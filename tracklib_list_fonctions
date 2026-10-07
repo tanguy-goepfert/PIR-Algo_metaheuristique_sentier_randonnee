@@ -1,0 +1,74 @@
+TrackLib : 
+https://github.com/umrlastig/tracklib
+Classe Track (une trace GPS)
+Infos générales
+size() : nombre de points (déduit)
+length() : longueur totale de la trace
+duration(), nanduration() : durée de la trace (déduit)
+frequency(mode) : fréquence moyenne en Hz (mode temporel) ou en m/pt (mode spatial)
+interval(mode) : inverse de la fréquence
+summary(), print() : affichage console de la trace
+toWKT() : export de la trace en WKT
+copy(), bbox(), getCentroid()
+
+
+
+Systèmes de coordonnées et fuseaux horaires
+
+toGeoCoords(), toENUCoords(), toECEFCoords(), toProjCoords(srid) : conversion entre systèmes de coordonnées
+toENUCoordsIfNeeded() : convertit en ENU seulement si la trace est en coordonnées géographiques
+toImageCoords(P1, P2, p1, p2) : convertit en coordonnées locales d'une image à partir de deux points de calage
+getSRID(), getTimeZone(), setTimeZone(), convertToTimeZone()
+Accès aux observations
+getObs(i), getFirstObs(), getLastObs(), getObsList()
+getX/Y/Z/T(i), getCoord(i), getTimestamps(), getTimestamps_str()
+getMinX/Y/Z(), getMaxX/Y/Z(), getLowerLeftPoint(), getUpperRightPoint()
+getNearestObs(o), getFurthestObs(o), getMedianObs(), getMedianObsInTime()
+getEnclosedPolygon() : polygone délimité par la trace
+Modification de la liste de points
+addObs(), insertObs(), insertObsInChronoOrder(), setObs(), setObsList()
+removeObs(), removeFirstObs(), removeLastObs(), popObs(), removeObsList()
+sort(), sortRadix(), isSorted(), reverse(), setOrder()
+setUid(), setTid() : identifiants utilisateur et trace
+
+
+Nettoyage
+
+removeNoDataValues(), count_missing_geom(), count_missing_temps()
+removeTpsDup(), removePosDup(), removeObsDup(), cleanDuplicates() : suppression des doublons temporels, spatiaux ou des deux
+removeIdleEnds() : supprime les points immobiles au début ou à la fin
+incrementTime() : ajoute un pas de temps à chaque point, utile quand les timestamps sont tous à la date par défaut de 1970
+Opérations temporelles
+extract(id_ini, id_fin) : extrait une portion entre deux indices
+extractSpanTime(tini, tfin) : extrait une portion entre deux instants
+addSeconds(), roundTimestamps()
+Features analytiques (AF), le cœur de la librairie
+createAnalyticalFeature(), addAnalyticalFeature(algorithm), updateAnalyticalFeature(), removeAnalyticalFeature(), hasAnalyticalFeature()
+getAnalyticalFeature(), getAnalyticalFeatures(), getListAnalyticalFeatures(), getObsAnalyticalFeature(), setObsAnalyticalFeature()
+fillAnalyticalFeature() : remplit une AF à partir de données externes
+setX/Y/Z/TFromAnalyticalFeature(), setX/Y/ZFromFunction() : redéfinissent les coordonnées ou le temps à partir d'une AF ou d'une fonction
+isAFTransition() : indique si l'AF est un marqueur binaire de changement de régime
+operate() / op() : calculs algébriques sur les AF. Par exemple track.operate("v=3.6*D{s}/D{t}") calcule une vitesse, avec Dpour la dérivée et I pour l'intégrale
+bioperate() / biop() : même chose entre deux traces
+query() : requêtes de type SQL (SELECT ... WHERE ...) sur les observations
+estimate_speed(), getSpeed(), getAbsCurv() : vitesse et abscisse curviligne
+Traitements géométriques et signal
+resample() : rééchantillonnage en mode spatial ou temporel, par interpolation linéaire, splines ou processus gaussien
+smooth() : lissage
+noise() : ajout de bruit, pour générer des traces synthétiques
+rotate(), rotate3D(), scale(), scale3D(), translate(), symmetrize(), shiftTo()
+mapOn() : transformation affine pour aligner deux traces (marquée comme dépréciée)
+loop(), makeOdd(), makeEven(), digitize(), dual() (déduits, peu documentés)
+
+Visualisation
+
+plot(), plotAsMarkers(), plotEllipses() (ellipses d'incertitude), plotProfil(), plotAnalyticalFeature(), plotFirstObs(), plotLastObs()
+Classe TrackCollection (un ensemble de traces)
+Gestion : addTrack(), removeTrack(), removeEmptyTrack(), getTrack(i), getTracks(), getTrackWithTid(), randNTracks(N) (échantillon aléatoire), copy(), size()
+Stats : length(), duration(), frequency(), summary(), toWKT()
+Coordonnées et temps : toGeoCoords(), toENUCoords(), toECEFCoords(), getSRID(), setTimeZone(), convertToTimeZone()
+Index spatial : createSpatialIndex(), exportSpatialIndex(), importSpatialIndex()
+Filtrage : filterOnBBox(bbox), bbox()
+Traitements appliqués à toutes les traces : resample(), smooth(), simplify(tolerance), noise(), operate(), addAnalyticalFeature()
+Segmentation : segmentation(afs_input, af_output, thresholds_max) marque des segments selon des seuils sur des AF, et split_segmentation() découpe ensuite les traces suivant ce marquage
+plot()
