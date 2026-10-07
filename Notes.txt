@@ -98,3 +98,19 @@ Reversible Jump Monte Carlo with Markov Chain :
 dimension variable (reversible jump) > plusieurs modèles en entrée avec des paramètres différents 
 Metropolis Hastings : échantillonnage aléatoire de MCMC 
  
+Algo d’optimisation
+recuit simulé = RJMCMC
+foot print 
+
+1 er réseau, d’abord à la main, 
+ou alors générer autant de segments qu’on à d’arc dans le réseau
+ensuite trouver un algo qui donne une solution 1 approximative
+
+
+Modifier le réseau 
+ajouter/supprimer un arc : plutôt au début
+Déplacer un noeud : plutôt à la fin 
+Vertex / noeud
+Ne pas considérer le terme vetex ?  → non rester en polyligne. Ne laisser l’ago ajouter un arc pour ajouter un vertex
+Trop d’arcs : pas bon
+trop de vetexs : pas bon
