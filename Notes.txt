@@ -1,0 +1,100 @@
+Yo la team 
+ 
+
+Notes première réunion 23-09-2026 :  
+Projet inforout : proposer des méthodes pour gérer les activités humaines en montagne 
+Outdoor vision : ministrère des sports  garmin 
+Pas travailler sur des traces réelles.  
+Algo fourmis : phéromone vers la nourriture 
+Fonction a optimiser 
+On part d’ou ? Qu’est ce qui est demandé 
+Matthieu bredif (lastig) : algo en C  
+Fonction objectif : pour la concevoir RMSE. Prend un réseau, et qui donne sa qualité  
+Algo : RJMCMC, permet d’obtenir le minimum local 
+Faire de l’état de l’art pour voir pourquoi cet algo est adapté 
+Fonction de pénalité/ coût d’un bon réseau 
+Terme d’attache au données 
+Apriori / terme d’attache aux données  
+Traces simulées : 
+Prendre un réseau qui existe —> vérité terrain.  
+État de l’art, contexte 
+Etat de l’art technique. Lancer le rmjcmc sur une réseau 
+Définir ce que c’est la fonction objectif 
+Simuler des traces sur un réseau BDTOPO et lancer l’algo dessus  
+Dire ce qui bloque si ça fonctionne pas.  
+Si ça fonctionne, appliquer sur des jeux de données réelles. Si ca ne fonctionne pas, regarder pourquoi 
+
+Simulation : tracklib python lastig GitHub  
+Savoir lire une trace, simuler a partir d’un réseau et exporter.  
+L312 : Marie Dominique 
+ 
+
+Notes réunion 30-09-2026 : 
+https://tracklib.readthedocs.io/en/latest/howto/SYN_SyntheticCollectionIssuedFromNetwork.html doc tracklib pour les premiers tests (1er reseau arbitraire R1 -> générer des trajectoires sur le réseau -> traces GPS à partir de ces trajectoires) (possible de demander les données de R1 par mail s’il n’y a pas d’exemple arbitraire dans la doc ou si l’on ne fabrique pas nous même le réseau)  
+->pour essayer de générer un réseau à partir de ces traces et voir s’il ressemble à R1  
+RJMCMC possible à recoder en quelques lignes si librairies trop techniques 
+fonction objectif = -(fonction coût) 
+exemple de MDVD : application plus simple trouver le centre d’un carré (attendre envoi ?) 
+ 
+
+Etat de l'art  
+
+ 
+Cao et Krumm (2009)  : proposent une méthode de reconstruction automatique d’un réseau routier à partir de traces GPS de véhicules. Leur approche commence par une agrégation des trajectoires fondées sur un modèle de champs de potentiel : les traces qui correspondent à une même route sont attirées les unes vers les autres afin de produire des trajectoires plus lisses et représentatives du centre de la route. Les trajectoires ainsi agrégées sont ensuite traitées par un algorithme de clustering spécifique, qui permet de construire un graphe composé de nœuds et d’arêtes représentant le réseau routier.  
+Cette étude montre que les positions GPS brutes doivent être consolidées avant la construction du graphe. Son application concerne cependant les déplacements automobiles sur routes.  
+Les traces de randonnée sont plus contraignantes sur le réseau existant au niveau de la géométrie et de la topologie car présence de hors-piste, passages étroits, croisements proches et GPS plus bruité. Risque de créer plusieurs chemins parallèles ou de fusionner des sentiers distincts. 
+ 
+Cao, L., & Krumm, J. (2009, November). From GPS traces to a routable road map. In 
+Proceedings of the 17th ACM SIGSPATIAL international conference on advances in 
+geographic information systems (pp. 3-12). 
+ 
+Ahmed et Wenk (2012) :  comparent chaque nouvelle trajectoire au graphe existant, puis y ajoutent les portions qui ne correspondent pas encore à une voie connue. Cette logique incrémentale est utile lorsque les données arrivent en grand nombre, mais son résultat dépend des décisions prises au fil de la construction. Une étude comparative ultérieure souligne d’ailleurs que les méthodes de construction de cartes doivent être évaluées avec plusieurs mesures et jeux de données : une carte géométriquement proche de la référence n’est pas nécessairement correcte sur le plan des connexions.  
+Le réseau est construit séquentiellement, donc cette stratégie peut rendre les décisions prises lors des premières étapes importantes pour la construction finale du réseau. En particulier, une association incorrecte entre une trajectoire et un arc existant peut influencer les étapes suivantes.  
+ 
+Ahmed, M., & Wenk, C. (2012). Constructing Street Networks from GPS Trajectories. European Symposium on Algorithms.  
+ 
+Macshane et Ahmadinia (2024) : construisent un réseau de sentiers à partir de données GPS publiques avec une growing self-organizing map (GSOM). Leur évaluation utilise la précision, la complétude et la correction topologique par comparaison à OpenStreetMap. Les auteurs rapportent des résultats particulièrement favorables sur des réseaux peu denses et sans bruit GPS important. 
+ 
+Macshane, J., & Ahmadinia, A. (2024). Construction of trail networks based on growing self-organizing maps and public GPS data. Knowledge-Based and Intelligent Engineering Systems, 28(2).  
+ 
+Lacoste et al. (2004) : Le projet CAROLINE a pour but d'extraire des réseaux de routes ou de rivières à partir d’images aériennes et satellitaires. Le réseau est représenté par un processus de polylignes : chaque objet est une polyligne constituée d'un nombre variable de segments. Cette représentation permet notamment de mieux représenter les lignes courbes et de gérer les connexions entre les différentes parties du réseau.  
+Dans CAROLINE, l'image fournit une information relativement continue : les pixels peuvent indiquer qu'une route ou une rivière est probablement présente à un endroit donné. Avec les traces GPS, l'information est  différente : l'absence de trace ne signifie pas nécessairement l'absence de sentier. Un sentier peu fréquenté peut ne produire aucune trace. 
+
+À l'inverse, une trace GPS peut temporairement s'écarter du véritable sentier à cause du bruit de localisation ou parce que le randonneur sort du chemin. 
+
+ 
+RMSE : La RMSE est la racine carrée de la moyenne des différences quadratiques entre les valeurs observées et les valeurs prédites. Il s'agit d'une mesure de régression largement utilisée qui nous indique le degré d'erreur à attendre de nos prédictions, en moyenne.   
+La formule mathématique pour calculer le RMSE est la suivante : 
+ 
+ici : 
+
+yi est la valeur réelle de l'observation i, 
+ŷ, est la valeur prédite pour l'observation i, 
+n est le nombre total d'observations. 
+
+En élevant les résidus au carré avant de calculer la moyenne, le RMSE pénalise plus fortement les erreurs importantes que les petites. Cette sensibilité en fait un bon choix lorsque des erreurs de prédiction importantes sont particulièrement indésirables. Le RMSE est toujours non négatif, et des valeurs plus faibles indiquent un meilleur ajustement du modèle. 
+Interprétation du RMSE :  
+Le RMSE est interprété comme l'erreur moyenne de prédiction, qui détermine la précision de prédiction du modèle. En d'autres termes, elle montre, en moyenne, à quel point les prédictions sont éloignées des valeurs réelles, dans la même échelle que la variable de résultat. 
+Un RMSE plus faible indique des erreurs de prédiction moyennes plus petites et, par conséquent, des prédictions plus précises, mais le RMSE "acceptable" dépend entièrement du contexte. Par exemple, un RMSE de 2 peut être bon pour prédire la taille des amandes en millimètres, mais pas si convaincant pour prédire les rendements annuels des cultures d'amandes en tonnes. 
+Algo d’optimisations :  
+Algorithme de colonies de fourmis 
+Différents algo existants :  
+Algorithme génétique (AG) 
+Colonies de fourmis (Ant Colony Optimization – ACO) 
+CMA-ES (Covariance Matrix Adaptation Evolution Strategy) 
+Algorithmes à évolution différentielle (Differential Evolution – DE) 
+GRASP (Greedy Randomized Adaptive Search Procedure) 
+ 
+Librairies Python possibles 
+-openMCMC : reversible jump présent dans le code mais sans doc 
+-aeMCMC idem, reversible jump cité sur      
+https://www.thetypicalset.com/aemcmc?trail=reversible_jump_mcmc 
+-bayesbay : utilise le RJMCMC comme base de ses calculs 
+-tracklib : https://github.com/umrlastig/tracklib 
+ 
+
+notes RJ MCMC: 
+Reversible Jump Monte Carlo with Markov Chain :  
+dimension variable (reversible jump) > plusieurs modèles en entrée avec des paramètres différents 
+Metropolis Hastings : échantillonnage aléatoire de MCMC 
+ 
