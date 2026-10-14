@@ -4,9 +4,18 @@ from initialisation_jeu_de_trace import *
 
 
 def random_tirage_track(tracks):
-    r = random.randint(0, len(tracks))
-    return tracks[r]
+    nbre_arcs = 2
+    nbre = math.ceil(nbre_arcs * math.log(nbre_arcs))
+    tkl.seed(150)
+    indices = random.sample(range(nbre_arcs), nbre)
 
+    var_traces = []
+    for i in indices:
+        trace = tracks.getTrack(i)
+        var_traces.append(trace)
+
+    liste_traces = tkl.core.TrackCollection(var_traces)
+    return liste_traces
 
 def ajout_d_un_arc(reseau):
     
