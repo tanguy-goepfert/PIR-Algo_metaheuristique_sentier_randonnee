@@ -1,12 +1,21 @@
 from initialisation_jeu_de_trace import *
-
+import math
 
 
 
 def random_tirage_track(tracks):
-    r = random.randint(0, len(tracks))
-    return tkl.TrackCollection([tracks[r]])
+    nbre_arcs = 2
+    nbre = math.ceil(nbre_arcs * math.log(nbre_arcs))
+    tkl.seed(150)
+    indices = random.sample(range(nbre_arcs), nbre)
 
+    var_traces = []
+    for i in indices:
+        trace = tracks.getTrack(i)
+        var_traces.append(trace)
+
+    liste_traces = tkl.core.TrackCollection(var_traces)
+    return liste_traces
 
 def ajout_d_un_arc(reseau, tracks):
     # Tirage du type d'action a faire : 99% tirer un trait droit, 1% tirer une trace dans le jeu de trace initial.
