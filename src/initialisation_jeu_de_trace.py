@@ -77,9 +77,7 @@ if __name__ == "__main__" :
     # Trace originale par dessus
     for t in tracks:
         plt.plot(t.getX(), t.getY(), 'k-', linewidth=2, label=f'originale')
-
-
-
+        
     plt.axis('equal')
     plt.legend()
     plt.show()

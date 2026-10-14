@@ -1,8 +1,6 @@
-import matplotlib.pyplot as plt
-import tracklib as tkl
 import math
 import statistics
-from src.initialisation_reseau import traces_random, bruitage
+from initialisation_jeu_de_trace import *
      
      
 
