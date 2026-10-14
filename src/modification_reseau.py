@@ -52,7 +52,26 @@ def supprimer_arc(trace, debut, fin):
 
     return trace
 
+def deplacer_vertex(trace, indice, nouveau_x, nouveau_y):
+    """
+    Déplace un point de la trace GPS.
+    """
 
+    if indice < 0 or indice >= trace.size():
+        print("Indice invalide")
+        return trace
+
+    # Récupérer le point à déplacer
+    observation = trace.getObs(indice)
+
+    # Modifier ses coordonnées
+    observation.position.setX(nouveau_x)
+    observation.position.setY(nouveau_y)
+
+    # Réinsérer l'observation modifiée dans la trace
+    trace.setObs(indice, observation)
+
+    return trace
 
 if __name__ == "__main__" :
     ### Generer les traces GPS
