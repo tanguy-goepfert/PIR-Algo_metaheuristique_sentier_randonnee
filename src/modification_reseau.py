@@ -32,7 +32,47 @@ def ajout_d_un_arc(reseau, tracks):
         new_arc = tkl.Track([o1, o2])
     reseau.addTrack(new_arc)
 
+def supprimer_arc(trace, debut, fin):
+    """
+    Supprime un arc d'une trace GPS.
+    L'arc correspond aux observations entre debut et fin inclus.
+    """
 
+    if debut < 0 or fin >= trace.size() or debut > fin:
+        print("Indices invalides")
+        return trace
+
+    observations = trace.getObsList()
+
+    # Conserver les observations avant et après l'arc
+    nouvelles_observations = (
+        observations[:debut] + observations[fin + 1:]
+    )
+
+    trace.setObsList(nouvelles_observations)
+
+    return trace
+
+def deplacer_vertex(trace, indice, nouveau_x, nouveau_y):
+    """
+    Déplace un point de la trace GPS.
+    """
+
+    if indice < 0 or indice >= trace.size():
+        print("Indice invalide")
+        return trace
+
+    # Récupérer le point à déplacer
+    observation = trace.getObs(indice)
+
+    # Modifier ses coordonnées
+    observation.position.setX(nouveau_x)
+    observation.position.setY(nouveau_y)
+
+    # Réinsérer l'observation modifiée dans la trace
+    trace.setObs(indice, observation)
+
+    return trace
 
 if __name__ == "__main__" :
     ### Generer les traces GPS
