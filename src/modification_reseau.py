@@ -1,7 +1,8 @@
 from initialisation_jeu_de_trace import *
 import math
 
-
+# Génération aléatoire indépendante
+rng = random.Random()
 
 def random_tirage_track(tracks):
     nbre_arcs = 2
@@ -19,14 +20,15 @@ def random_tirage_track(tracks):
 
 def ajout_d_un_arc(reseau, tracks):
     # Tirage du type d'action a faire : 99% tirer un trait droit, 1% tirer une trace dans le jeu de trace initial.
-    r = random.randint(0, 100)
-    if r == 99 :
-        new_arc = random.choice(tracks)
+
+    r = rng.randint(0, 5)
+    print(r)
+    # r = 99
+    if r == 4 :
+        new_arc = rng.choice(tracks)
     else :
-        tkl.seed(3)
-        p1 = tkl.ENUCoords(random.randint(0, 100), random.randint(0, 100),  0.0)
-        tkl.seed(4)
-        p2 = tkl.ENUCoords(random.randint(0, 100), random.randint(0, 100),  0.0)
+        p1 = tkl.ENUCoords(rng.randint(0, 100), rng.randint(0, 100),  0.0)
+        p2 = tkl.ENUCoords(rng.randint(0, 100), rng.randint(0, 100),  0.0)
         o1 = tkl.Obs(p1)
         o2 = tkl.Obs(p2)
         new_arc = tkl.Track([o1, o2])
@@ -89,7 +91,7 @@ if __name__ == "__main__" :
     # Affichage
     plt.figure(figsize=(8, 6))
     for r in reseau:
-        plt.plot(r.getX(), r.getY(), linewidth=5, alpha=0.5, color='black')
+        plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='black')
 
     for t in gps_tracks:
         plt.plot(t.getX(), t.getY(), linewidth=0.7, alpha=0.5)
