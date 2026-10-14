@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import tracklib as tkl
 import numpy as np
 import random
-from demonstration_tkl import visualizeAggTraj, color
 import datetime
 
 def traces_random(nb, sinuosite=0.2):
