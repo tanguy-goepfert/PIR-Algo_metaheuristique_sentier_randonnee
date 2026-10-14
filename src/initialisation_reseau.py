@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import tracklib as tkl
 import numpy as np
 import random
-from demonstration_tkl import visualizeAggTraj, color
 import datetime
 
 def traces_random(nb, sinuosite=0.2):
@@ -24,7 +23,7 @@ def traces_random(nb, sinuosite=0.2):
     return tracks
 
 
-def bruitage(N):
+def bruitage(tracks, N):
     # nombre de traces bruitées souhaitées
     gps_tracks = tkl.core.TrackCollection()
     for trace in tracks :
@@ -52,7 +51,7 @@ if __name__ == "__main__" :
     # Bruitage 
     # ----------------------------------------------------------
 
-    gps_tracks = bruitage(10)
+    gps_tracks = bruitage(tracks, 10)
 
 
     # ----------------------------------------------------------
