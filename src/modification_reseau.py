@@ -31,6 +31,27 @@ def ajout_d_un_arc(reseau, tracks):
     new_reseau = reseau.addTrack(new_arc) 
     return new_reseau
 
+def supprimer_arc(trace, debut, fin):
+    """
+    Supprime un arc d'une trace GPS.
+    L'arc correspond aux observations entre debut et fin inclus.
+    """
+
+    if debut < 0 or fin >= trace.size() or debut > fin:
+        print("Indices invalides")
+        return trace
+
+    observations = trace.getObsList()
+
+    # Conserver les observations avant et après l'arc
+    nouvelles_observations = (
+        observations[:debut] + observations[fin + 1:]
+    )
+
+    trace.setObsList(nouvelles_observations)
+
+    return trace
+
 
 
 if __name__ == "__main__" :
