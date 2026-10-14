@@ -5,12 +5,22 @@ from initialisation_jeu_de_trace import *
 
 def random_tirage_track(tracks):
     r = random.randint(0, len(tracks))
-    return tracks[r]
+    return tkl.TrackCollection([tracks[r]])
 
 
-def ajout_d_un_arc(reseau):
-    
-    pass
+def ajout_d_un_arc(reseau, tracks):
+    # Tirage du type d'action a faire : 99% tirer un trait droit, 1% tirer une trace dans le jeu de trace initial.
+    r = random.randint(0, 100)
+    if r == 99 :
+        new_arc = tkl.TrackCollection([tracks[random.randint(0, len(tracks))]])
+    else :
+        x_o1 = random.randint(0, 100)
+        y_o1 = random.randint(0, 100)
+        x_o2 = random.randint(0, 100)
+        y_o2 = random.randint(0, 100)
+        new_arc = tkl.track(tkl.Obs(x_o1, y_o1), tkl.Obs(x_o2, y_o2))
+    new_reseau = reseau.addTrack(new_arc) 
+    return new_reseau
 
 
 
@@ -22,13 +32,20 @@ if __name__ == "__main__" :
     # Bruitage 
     gps_tracks = bruitage(tracks, 10)
 
-
     reseau = random_tirage_track(gps_tracks)
 
     # Affichage
     plt.figure(figsize=(8, 6))
-    plt.plot(reseau.getX(), reseau.getY(), linewidth=0.7, alpha=0.5)
+    for t in reseau:
+        plt.plot(t.getX(), t.getY(), linewidth=0.7, alpha=0.5)
     plt.axis('equal')
     plt.legend()
     plt.show()
 
+    # Affichage des traces GPS
+    plt.figure(figsize=(8, 6))
+    for t in gps_tracks:
+        plt.plot(t.getX(), t.getY(), linewidth=0.7, alpha=0.5)
+    plt.axis('equal')
+    plt.legend()
+    plt.show()

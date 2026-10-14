@@ -43,7 +43,7 @@ if __name__ == "__main__" :
     # Generer les traces
     # ----------------------------------------------------------
 
-    tkl.seed(110) #bloque l'aléatoire
+    #tkl.seed(110) #bloque l'aléatoire
     tracks = traces_random(2, 0.1)
 
 
