@@ -114,3 +114,12 @@ Vertex / noeud
 Ne pas considérer le terme vetex ?  → non rester en polyligne. Ne laisser l’ago ajouter un arc pour ajouter un vertex
 Trop d’arcs : pas bon
 trop de vetexs : pas bon
+
+idées composantes de la fonction objectif/cout :
+-distance(?) du reseau aux traces
+-nombre d'arc en double (+ doublons = + cout) (ou bien arc parallèles très proches)
+-nombre d'arc (arbitraire) (abs(nbr - nbr_cible)) ou bien avec un max (min(0,nbr - nbr_max))
+-nombre de noeuds __ idem qu'au dessus
+-nombre de vertex ?
+-proportion de traces contenues dans le reseau ?
+-
