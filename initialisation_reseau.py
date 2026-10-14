@@ -23,7 +23,7 @@ def traces_random(nb, sinuosite=0.2):
     return tracks
 
 
-def bruitage(N):
+def bruitage(tracks, N):
     # nombre de traces bruitées souhaitées
     gps_tracks = tkl.core.TrackCollection()
     for trace in tracks :
