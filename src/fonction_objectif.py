@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import tracklib as tkl
 import math
 import statistics
-from initialisation_reseau import traces_random, bruitage
+from src.initialisation_reseau import traces_random, bruitage
      
      
 
