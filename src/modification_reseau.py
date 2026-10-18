@@ -4,11 +4,16 @@ import math
 # Génération aléatoire indépendante
 rng = random.Random()
 
-def random_tirage_track(tracks):
-    nbre_arcs = 2
-    nbre = math.ceil(nbre_arcs * math.log(nbre_arcs))
+def random_tirage_track(tracks, nbre_arcs=2): 
+    """
+    Tire des traces au hasard dans un jeu de données de trace GPS. Cette fonction sert a initialiser le réseau qu'on va faire évoluer. 
+    tracks --> traces GPS en entrée
+    nbre_arcs --> estimation du nombre d'arc du réseau final
+    """
+
+    nbre = math.ceil(nbre_arcs * math.log(nbre_arcs)) # Nombre de traces a piocher dans le jeu de traces GPS (nlogn, collectionneur de timbre)
     tkl.seed(150)
-    indices = random.sample(range(nbre_arcs), nbre)
+    indices = rng.sample(range(nbre_arcs), nbre)
 
     var_traces = []
     for i in indices:
@@ -18,13 +23,17 @@ def random_tirage_track(tracks):
     liste_traces = tkl.core.TrackCollection(var_traces)
     return liste_traces
 
-def ajout_d_un_arc(reseau, tracks):
-    # Tirage du type d'action a faire : 99% tirer un trait droit, 1% tirer une trace dans le jeu de trace initial.
+def ajouter_arc(reseau, tracks):
+    """
+    Ajoute un arc a un réseau d'arcs. 
+    L'arc peut être un trait tiré aléatoirement dans l'espace (99% de chance) ou une trace récupéré dans le jeu de traces GPS initiales (1% de chance)
+    """
 
-    r = rng.randint(0, 5)
+    # Tirage du type d'action a faire : 99% tirer un trait droit, 1% tirer une trace dans le jeu de trace initial.
+    r = rng.randint(0, 100)
     print(r)
     # r = 99
-    if r == 4 :
+    if r == 99 :
         new_arc = rng.choice(tracks)
     else :
         p1 = tkl.ENUCoords(rng.randint(0, 100), rng.randint(0, 100),  0.0)
@@ -34,7 +43,14 @@ def ajout_d_un_arc(reseau, tracks):
         new_arc = tkl.Track([o1, o2])
     reseau.addTrack(new_arc)
 
-def supprimer_arc(trace, debut, fin):
+def supprimer_arc(reseau):
+    """
+    A finir
+    """
+    r = rng.randint(0, len(reseau)) # Indice aléatoire de la trace à supprimer
+    reseau.delTrack()
+
+def supprimer_vertex(trace, debut, fin):
     """
     Supprime un arc d'une trace GPS.
     L'arc correspond aux observations entre debut et fin inclus.
@@ -77,24 +93,36 @@ def deplacer_vertex(trace, indice, nouveau_x, nouveau_y):
     return trace
 
 if __name__ == "__main__" :
+
     ### Generer les traces GPS
-    ### ----------------------
     tkl.seed(110) #bloque l'aléatoire
     tracks = traces_random(2, 0.1)
     # Bruitage 
     gps_tracks = bruitage(tracks, 10)
-    # Initialisation d'un premier réseau 
-    reseau = random_tirage_track(gps_tracks)
-    # Ajout d'un arc
-    ajout_d_un_arc(reseau, tracks)
 
-    # Affichage
+    # Affichage des traces GPS
     plt.figure(figsize=(8, 6))
+    # for t in gps_tracks:
+    #     plt.plot(t.getX(), t.getY(), linewidth=0.7, alpha=0.5)
+
+
+    ### Initialisation d'un premier réseau 
+    reseau = random_tirage_track(gps_tracks)
+    # Affichage
     for r in reseau:
         plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='black')
 
-    for t in gps_tracks:
-        plt.plot(t.getX(), t.getY(), linewidth=0.7, alpha=0.5)
-    plt.axis('equal')
-    plt.legend()
+    # Ajout d'un arc
+    ajouter_arc(reseau, tracks)
+    # Affichage
+    for r in reseau:
+        plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='green')
+
+    # Suppression d'un arc
+    trace = reseau[0]
+    supprimer_vertex(trace, 2, 100)
+
+    # Affichage
+    for r in reseau:
+        plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='red')
     plt.show()
