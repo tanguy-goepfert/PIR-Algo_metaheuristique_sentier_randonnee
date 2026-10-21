@@ -1,10 +1,9 @@
 import math
 import statistics
 from initialisation_jeu_de_trace import *
+from modification_reseau import *
+import numpy as np
      
-     
-
-
 def ecart_traces(trace1, trace2):
     x1 = trace1.getX()
     y1 = trace1.getY()
@@ -35,25 +34,53 @@ def ecart_traces(trace1, trace2):
     return moyenne, ecart_type
         
 
-def comparer_toutes_traces(gps_tracks):
-    resultats = []
-    n = gps_tracks.size()
+# def comparer_toutes_traces(gps_tracks):
+#     resultats = []
+#     n = len(gps_tracks)
 
+#     for i in range(n):
+#         trace1 = gps_tracks.getTrack(i)
+
+#         for j in range(i + 1, n):
+#             trace2 = gps_tracks.getTrack(j)
+
+#             # Calcul dans les deux sens pour une mesure symétrique
+#             d1 = ecart_traces(trace1, trace2)
+#             d2 = ecart_traces(trace2, trace1)
+
+#             ecart = (d1 + d2) / 2
+
+#             resultats.append((i, j, ecart))
+
+#     return resultats
+
+
+def objectif(reseau, gps_tracks) :
+    n = len(gps_tracks)
+    m = len(reseau)
+    print(n,m)
+    print("Nombre de comparaisons :", n*m)
+
+    scores = []
     for i in range(n):
-        trace1 = gps_tracks.getTrack(i)
+        print("i : ", i)
+        trace_i = gps_tracks.getTrack(i)
 
-        for j in range(i + 1, n):
-            trace2 = gps_tracks.getTrack(j)
+        for j in range(m):
+            arc_j = reseau.getTrack(j)
 
             # Calcul dans les deux sens pour une mesure symétrique
-            d1 = ecart_traces(trace1, trace2)
-            d2 = ecart_traces(trace2, trace1)
-
+            d1 = ecart_traces(trace_i, arc_j)[1]
+            d2 = ecart_traces(arc_j, trace_i)[1]
             ecart = (d1 + d2) / 2
+            scores.append(ecart)
+    return np.mean(scores)
 
-            resultats.append((i, j, ecart))
 
-    return resultats
+        
+
+    
+
 
 
 
@@ -64,7 +91,7 @@ if __name__ == "__main__" :
     # ----------------------------------------------------------
 
     tkl.seed(110) #bloque l'aléatoire
-    tracks = traces_random(2, 0.1)
+    tracks = traces_random(nb=2, sinuosite=0.1)
 
 
     # ----------------------------------------------------------
@@ -75,42 +102,39 @@ if __name__ == "__main__" :
 
 
     # ----------------------------------------------------------
-    # Manipulation
+    # Generer le réseau
     # ----------------------------------------------------------
+
+    reseau = random_tirage_track(gps_tracks, nbre_arcs=2)
+
+
+    # ----------------------------------------------------------
+    # Affichage
+    # ----------------------------------------------------------
+
+    plt.figure(figsize=(8, 6))
+
+    # Affichage des traces
     for t in gps_tracks:
-        print("Nouvelle trace")
-        for obs in t.getObsList():
-            plt.plot(t.getX(), t.getY(), 'k-', linewidth=2, label=f'originale')
-
-
-
-    # # ----------------------------------------------------------
-    # # Affichage
-    # # ----------------------------------------------------------
-
-    # plt.figure(figsize=(8, 6))
-
-    # # Affichage des traces
-    # for t in gps_tracks:
-    #     plt.plot(t.getX(), t.getY(), linewidth=0.7, alpha=0.5)
+        plt.plot(t.getX(), t.getY(), linewidth=0.7, color='blue')
     
-    # # Trace originale par dessus
-    # for t in tracks:
-    #     plt.plot(t.getX(), t.getY(), 'k-', linewidth=2, label=f'originale')
+    # Reseau par dessus
+    for t in reseau:
+        plt.plot(t.getX(), t.getY(), linewidth=1, color='red')
 
-
-
-    # plt.axis('equal')
-    # plt.legend()
-    # plt.show()
-
+    
     # -----------------------------------------------------------
     # Fonction objectif
     # -----------------------------------------------------------
     
-    resultats = comparer_toutes_traces(gps_tracks)
+    resultat = objectif(reseau, gps_tracks)
+
+    print("RESULTAT : ", resultat)
+
     
-    for i, j, ecart in resultats:
-        print(f"Trace {i} - Trace {j} : écart = {ecart:.3f}")
     
-    print("Nombre de comparaisons :", len(resultats))
+
+
+
+    plt.show()
+    
