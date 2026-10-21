@@ -51,17 +51,16 @@ def RJMCMC(modele,perturbations,objectif,arret,prob_perturbations=[]):
     suivi_sauts=[(action,accepte)] #suivi des sauts effectues, (-1,-1) pour l'état initial
 
     if prob_perturbations==[]: #equiprobatilite
-        prob_perturbations = np.ones(len(perturbations))*1/len(perturbations)
-    
+        prob_perturbations = np.ones(len(perturbations))/len(perturbations)
     for i in range(arret):
         #tirage_au_sort, d'une des perturbations avec la loi de probabilite 
         #en entree
-        action=random.choices(indices_actions,prob_perturbations)
+        action=random.choices(indices_actions,prob_perturbations)[0]
         #saut
         reseau_potentiel=perturbations[action](etats[i],traces)
         #evaluation : si on minimise la fonction cout, on accepte, sinon on
         #tire au sort avec proba cout(i)/cout(i+1 potentiel)
-        if random.random()<=objectif(etats[i])/objectif(reseau_potentiel):
+        if random.random()<=objectif(etats[i],traces)/objectif(reseau_potentiel,traces):
             etats.append(reseau_potentiel)
             accepte=1
         else: #on garde l'etat precedent
@@ -70,3 +69,14 @@ def RJMCMC(modele,perturbations,objectif,arret,prob_perturbations=[]):
         suivi_sauts.append((action,accepte))
         
     return etats,suivi_sauts
+
+if __name__=="__main__" :
+    #test du rjmcmc avec 
+    def plusun(r,t):
+        return r+1
+    def moinsun(r,t):
+        return r-1
+
+    def cout(r,t): #distance10 à 50
+        return max((r-50)**10,1)#evite la division par zéro
+    test=RJMCMC([0,0],[plusun,moinsun],cout,50000) #modèle : un compteur, perturbation +1 -1
