@@ -48,7 +48,11 @@ def supprimer_arc(reseau):
     A finir
     """
     r = rng.randint(0, len(reseau)) # Indice aléatoire de la trace à supprimer
-    reseau.delTrack()
+    print(r)
+    reseau.removeTrack(r)
+
+
+
 
 def supprimer_vertex(trace, debut, fin):
     """
