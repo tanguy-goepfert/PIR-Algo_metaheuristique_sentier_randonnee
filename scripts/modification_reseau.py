@@ -45,11 +45,11 @@ def ajouter_arc(reseau, tracks):
 
 def supprimer_arc(reseau):
     """
-    A finir
+    Supprime aléatoirement un arc du réseau. 
     """
-    r = rng.randint(0, len(reseau)) # Indice aléatoire de la trace à supprimer
-    print(r)
-    reseau.removeTrack(r)
+    r = rng.randint(0, len(reseau) - 1) # Indice aléatoire de la trace à supprimer
+    trace_a_sup = reseau.getTrack(r)
+    reseau.removeTrack(trace_a_sup)
 
 
 
@@ -112,19 +112,23 @@ if __name__ == "__main__" :
 
     ### Initialisation d'un premier réseau 
     reseau = random_tirage_track(gps_tracks)
-    # Affichage
-    for r in reseau:
-        plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='black')
+    # # Affichage
+    # for r in reseau:
+    #     plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='black')
 
-    # Ajout d'un arc
-    ajouter_arc(reseau, tracks)
-    # Affichage
-    for r in reseau:
-        plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='green')
+    # # Ajout d'un arc
+    # ajouter_arc(reseau, tracks)
+    # # Affichage
+    # for r in reseau:
+    #     plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='green')
+
+    # # Suppression d'un vertex
+    # trace = reseau[0]
+    # supprimer_vertex(trace, 2, 100)
 
     # Suppression d'un arc
-    trace = reseau[0]
-    supprimer_vertex(trace, 2, 100)
+    supprimer_arc(reseau)
+
 
     # Affichage
     for r in reseau:
