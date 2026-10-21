@@ -55,6 +55,20 @@ def ecart_traces(trace1, trace2):
 #     return resultats
 
 
+# #fonctions qui augmentent quand on dépasse d'un nombre nmax d'objet dans le reseau
+# def maximum_arcs(reseau,gps_tracks,nmax=500): #assez limitant à voir plus tard
+#     return max(0,len(reseau)-nmax) # a multiplier par un facteur selon le reste
+
+# def maximum_vertex(reseau,gps_tracks,nmax=10000): #assez limitant à voir plus tard
+#     compteur=0
+#     n=len(reseau)
+#     track=[]
+#     for i in range(n):
+#         track=reseau.getTrack(i)
+#         compteur+=len(track.getX())
+#     return max(0,compteur - nmax(10000)) # a multiplier par un facteur selon le reste
+
+
 def objectif(reseau, gps_tracks) :
     n = len(gps_tracks)
     m = len(reseau)
@@ -77,7 +91,7 @@ def objectif(reseau, gps_tracks) :
     return np.mean(scores)
 
 
-        
+
 
     
 
