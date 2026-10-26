@@ -54,12 +54,17 @@ def supprimer_arc(reseau):
 
 
 
-def supprimer_vertex(trace, debut, fin):
+def supprimer_vertex(reseau):
     """
     Supprime un arc d'une trace GPS.
     L'arc correspond aux observations entre debut et fin inclus.
     """
-
+    r = rng.randint(0, len(reseau) - 1)
+    trace = reseau.getTrack(r)
+    debut = rng.randint(0, len(trace) - 1)
+    fin = rng.randint(debut, len(trace) - 1)
+    print(len(trace))
+    print(debut, fin)
     if debut < 0 or fin >= trace.size() or debut > fin:
         print("Indices invalides")
         return trace
@@ -127,7 +132,7 @@ if __name__ == "__main__" :
     # supprimer_vertex(trace, 2, 100)
 
     # Suppression d'un arc
-    supprimer_arc(reseau)
+    supprimer_vertex(reseau)
 
 
     # Affichage
