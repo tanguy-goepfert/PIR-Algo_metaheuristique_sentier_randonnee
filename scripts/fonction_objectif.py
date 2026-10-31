@@ -152,6 +152,7 @@ if __name__ == "__main__" :
     reseau = tracks.copy() 
     supprimer_arc(reseau)
     ajouter_arc(reseau, tracks)
+    print("TEST")
 
 
     # ----------------------------------------------------------
