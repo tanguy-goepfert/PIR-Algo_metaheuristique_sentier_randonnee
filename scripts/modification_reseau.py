@@ -43,24 +43,24 @@ def ajouter_arc(reseau, tracks):
         new_arc = tkl.Track([o1, o2])
     reseau.addTrack(new_arc)
 
-def supprimer_arc(reseau):
+
+def supprimer_arc(reseau, tracks):
     """
     Supprime aléatoirement un arc du réseau. 
     """
-    r = rng.randint(0, len(reseau) - 1) # Indice aléatoire de la trace à supprimer
-    trace_a_sup = reseau.getTrack(r)
-    reseau.removeTrack(trace_a_sup)
+    r = rng.randint(0, len(reseau) - 1) # Indice aléatoire de l'arc à supprimer
+    arc_a_sup = reseau.getTrack(r)
+    reseau.removeTrack(arc_a_sup)
 
 
 
-
-def supprimer_vertex(reseau):
+def supprimer_vertex(reseau, tracks):
     """
     Supprime un arc d'une trace GPS.
     L'arc correspond aux observations entre debut et fin inclus.
     """
     r = rng.randint(0, len(reseau) - 1)
-    trace = reseau.getTrack(r)
+    trace = reseau.getTrack(r) # Sélectionne une trace au hasard
     debut = rng.randint(0, len(trace) - 1)
     fin = rng.randint(debut, len(trace) - 1)
     print(len(trace))
@@ -80,26 +80,45 @@ def supprimer_vertex(reseau):
 
     return trace
 
-def deplacer_vertex(trace, indice, nouveau_x, nouveau_y):
+def deplacer_vertex(reseau, tracks):
     """
-    Déplace un point de la trace GPS.
+    Déplace un point d'un arc du réseau
     """
+    # Séléction de l'arc à modifier
+    r = rng.randint(0, len(reseau) - 1) # Indice aléatoire de la trace à supprimer
+    arc_a_modif = reseau.getTrack(r)
 
-    if indice < 0 or indice >= trace.size():
+    # Supprimer l'ancien arc
+    reseau.removeTrack(arc_a_modif)
+
+    ### Modification de l'arc
+
+    # Indice aléatoire du vertex à déplacer
+    indice = rng.randint(0, len(arc_a_modif) - 1) 
+
+    # Nouvelles coordonnées aléatoires
+    bbox = tracks.bbox()
+    nouveau_x = rng.uniform(bbox[0], bbox[1])
+    nouveau_y = rng.uniform(bbox[2], bbox[3])
+
+    if indice < 0 or indice >= arc_a_modif.size():
         print("Indice invalide")
-        return trace
+        return False
 
     # Récupérer le point à déplacer
-    observation = trace.getObs(indice)
+    observation = arc_a_modif.getObs(indice)
 
     # Modifier ses coordonnées
     observation.position.setX(nouveau_x)
     observation.position.setY(nouveau_y)
 
-    # Réinsérer l'observation modifiée dans la trace
-    trace.setObs(indice, observation)
+    # Réinsérer l'observation modifiée dans l'arc
+    arc_a_modif.setObs(indice, observation)
 
-    return trace
+    # Réinsérer l'arc dans réseau
+    reseau.addTrack(arc_a_modif)
+
+
 
 if __name__ == "__main__" :
 
@@ -131,9 +150,11 @@ if __name__ == "__main__" :
     # trace = reseau[0]
     # supprimer_vertex(trace, 2, 100)
 
-    # Suppression d'un arc
-    supprimer_vertex(reseau)
+    # # Suppression d'un arc
+    # supprimer_vertex(reseau)
 
+    # Déplacer un vertex
+    deplacer_vertex(reseau, tracks)
 
     # Affichage
     for r in reseau:
