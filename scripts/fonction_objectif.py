@@ -76,17 +76,17 @@ def objectif(reseau, gps_tracks) :
     """
     m = len(gps_tracks)
     n = len(reseau)
-    print("Nombre de comparaisons :", n*m)
+    # print("Nombre de comparaisons :", n*m)
 
     scores = []
     for i in range(n): # Pour chaque arc du réseau
-        print("arc =", i)
+        # print("arc =", i)
         score_i = math.inf
         arc_i = reseau.getTrack(i)
 
 
         for j in range(m): # Distance avec chaque trace
-            print("trace =", j)
+            # print("trace =", j)
             trace_j = gps_tracks.getTrack(j)
 
             # Calcul de la distance de hausdorf
@@ -95,15 +95,15 @@ def objectif(reseau, gps_tracks) :
                 score_i = dH
         scores.append(score_i)
 
-    print(scores)
+    # print(scores)
     for j in range(m): # Pour chaque trace
-        print("trace =", j)
+        # print("trace =", j)
         score_j = math.inf
         trace_j = gps_tracks.getTrack(j)
 
 
         for i in range(n): # Pour chaque arc du réseau
-            print("arc =", i)
+            # print("arc =", i)
             arc_i = reseau.getTrack(i)
 
             # Calcul de la distance de hausdorf
@@ -113,7 +113,7 @@ def objectif(reseau, gps_tracks) :
         scores.append(score_j)
 
         
-    print(scores)
+    # print(scores)
     return np.mean(scores)
 
 
@@ -135,11 +135,11 @@ if __name__ == "__main__" :
     tracks = traces_random(nb=2, sinuosite=0.1)
 
 
-    # # ----------------------------------------------------------
-    # # Bruitage 
-    # # ----------------------------------------------------------
+    # ----------------------------------------------------------
+    # Bruitage 
+    # ----------------------------------------------------------
 
-    # gps_tracks = bruitage(tracks, 10)
+    gps_tracks = bruitage(tracks, 5)
 
 
     # ----------------------------------------------------------
@@ -147,12 +147,11 @@ if __name__ == "__main__" :
     # ----------------------------------------------------------
 
     # reseau = random_tirage_track(gps_tracks, nbre_arcs=2)
-    tkl.seed(10)
-    # reseau = traces_random(nb=2, sinuosite=0.5)
-    reseau = tracks.copy() 
-    supprimer_arc(reseau)
-    ajouter_arc(reseau, tracks)
-    print("TEST")
+    tkl.seed(2)
+    reseau = traces_random(nb=2, sinuosite=0.5)
+    # reseau = tracks.copy() 
+    # supprimer_arc(reseau)
+    # ajouter_arc(reseau, tracks)
 
 
     # ----------------------------------------------------------
@@ -162,19 +161,19 @@ if __name__ == "__main__" :
     plt.figure(figsize=(8, 6))
 
     # Affichage des traces
-    for t in tracks:
-        plt.plot(t.getX(), t.getY(), linewidth=2, color='blue')
+    for t in gps_tracks:
+        plt.plot(t.getX(), t.getY(), linewidth=2, color='black')
     
     # Reseau par dessus
     for t in reseau:
-        plt.plot(t.getX(), t.getY(), linewidth=1, color='red')
+        plt.plot(t.getX(), t.getY(), linewidth=1, color='blue')
 
     
     # -----------------------------------------------------------
     # Fonction objectif
     # -----------------------------------------------------------
     
-    print("resultat obj ", objectif(reseau, tracks))
+    print("resultat obj ", objectif(reseau, gps_tracks))
 
     plt.show()
     

@@ -8,6 +8,8 @@ Created on Wed Oct 14 2026
 #%% imports
 import numpy as np
 import random
+from modification_reseau import *
+from fonction_objectif import *
 
 #%% fonctions
 
@@ -53,6 +55,7 @@ def RJMCMC(modele,perturbations,objectif,arret,prob_perturbations=[]):
     if prob_perturbations==[]: #equiprobatilite
         prob_perturbations = np.ones(len(perturbations))/len(perturbations)
     for i in range(arret):
+        print(i)
         #tirage_au_sort, d'une des perturbations avec la loi de probabilite 
         #en entree
         action=random.choices(indices_actions,prob_perturbations)[0]
@@ -125,14 +128,106 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         
     return reseau
 
+def RJMCMC_reseau_traces_naive(r0,traces,perturbations,objectif,arret,prob_perturbations=[]):
+    """
+    Parameters
+    ----------
+    r0 : TYPE tracklib Trackcollection
+        DESCRIPTION : reseau a l'etat initial
+    traces : TYPE tracklib Trackcollection
+        DESCRIPTION : traces a partir desquelles on veut construire le reseau
+    perturbations : TYPE liste de fonctions (reseau -> reseau)
+        DESCRIPTION : une liste contenant la liste de toutes les actions à
+        explorer.
+    objectif : TYPE fonction (modele -> float)
+        DESCRIPTION : Evalue la qualite d'un reseau (de l'état donné d'un modèle)
+        pour l'instant considéré comme 
+    arret : TYPE int
+        DESCRIPTION : Le nombre de saut a effectuer 
+        (changer en rayon de convergence ?)
+        
+    prob_perturbations : TYPE liste de float
+        DESCRIPTION : contient les probabilites d'effectuer chaque action lors
+        des sauts. (refaire la fonction avec proba variables ?)
+        vide par defaut pour contenir une equiprobabilite
+
+    Returns
+    -------
+    etats : TYPE : liste de reseaux
+        DESCRIPTION : contient tous les sauts effectues par le RJMCMC (tires au
+        au sort puis valides)
+        
+    suivi_sauts : TYPE : liste de couples d'entiers
+        DESCRIPTION : la liste des couples (indice d'action et booleen d'acceptation) 
+    """
+    #initialisation
+    reseau = r0.copy()
+    reseau_potentiel=reseau.copy()
+    action=-1 #memoire de l'indice de la perturbation selectionnee par tirage au sort
+    indices_actions=list(range(len(perturbations))) 
+
+    if prob_perturbations==[]: #equiprobatilite
+        prob_perturbations = np.ones(len(perturbations))/len(perturbations)
+    for i in range(arret):
+        print("itération rjmcmc", i)
+        #tirage_au_sort, d'une des perturbations avec la loi de probabilite 
+        #en entree
+        action=random.choices(indices_actions,prob_perturbations)[0]
+        #saut
+        reseau_potentiel=reseau.copy()
+        perturbations[action](reseau_potentiel,traces)
+        #evaluation : si on minimise la fonction cout, on accepte, sinon on
+        #tire au sort avec proba cout(i)/cout(i+1 potentiel)
+        if objectif(reseau_potentiel,traces) < objectif(reseau,traces) :
+            reseau=reseau_potentiel
+            print(objectif(reseau_potentiel,traces))
+        
+    return reseau
+
 
 if __name__=="__main__" :
-    #test du rjmcmc avec 
-    def plusun(r,t):
-        return r+1
-    def moinsun(r,t):
-        return r-1
+    # #test du rjmcmc avec 
+    # def plusun(r,t):
+    #     return r+1
+    # def moinsun(r,t):
+    #     return r-1
+    # def cout(r,t): #distance10 à 50
+    #     return max((r-50)**10,1)#evite la division par zéro
 
-    def cout(r,t): #distance10 à 50
-        return max((r-50)**10,1)#evite la division par zéro
-    test=RJMCMC([0,0],[plusun,moinsun],cout,50000) #modèle : un compteur, perturbation +1 -1
+
+    ### Generer les traces GPS
+    tkl.seed(110) #bloque l'aléatoire
+    tracks = traces_random(nb=2, sinuosite=0.1)
+    # Bruitage 
+    gps_tracks = bruitage(tracks, 5)
+
+    ### Initialisation d'un premier réseau 
+    tkl.seed(2)
+    reseau = traces_random(nb=2, sinuosite=0.5)
+
+    ### Affichage
+    plt.figure(figsize=(8, 6))
+
+    # Affichage des traces
+    for t in gps_tracks:
+        plt.plot(t.getX(), t.getY(), linewidth=2, color='black')
+    
+    # Reseau par dessus
+    for t in reseau:
+        plt.plot(t.getX(), t.getY(), linewidth=1, color='blue')
+
+    
+
+
+    ### RJMCMC
+    
+    actions = [deplacer_vertex]
+    
+    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=3000) #modèle : un compteur, perturbation +1 -1
+    print("Score initial : ", objectif(reseau, gps_tracks))
+    print("Score solution : ", objectif(solution, gps_tracks))
+
+    # Reseau par dessus
+    for s in solution:
+        plt.plot(s.getX(), s.getY(), linewidth=1, color='red')
+    plt.show()
