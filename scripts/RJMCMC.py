@@ -126,7 +126,7 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         if random.random()<=min(1,
                                 np.exp(
                                     -(objectif(reseau_potentiel,traces)-objectif(reseau,traces))
-                                    /(10/np.log(0.8)*(0.99**(i//100))) #100 le pas de decroissance
+                                    /(10/np.log(0.8)/(0.99**(i//100))) #100 le pas de decroissance
                                     ) #10 à peu près une variation de cout
                                 ):
             reseau=reseau_potentiel
