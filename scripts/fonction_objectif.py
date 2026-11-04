@@ -67,6 +67,34 @@ def distance_hausdorff(trace1, trace2):
     # Le maximum de ces minimums
     return max(np.max(d1), np.max(d2))
 
+def distance_moyenne(trace1, trace2):
+    """
+    Calcule la distance de Hausdorff discrète entre deux lignes (ensembles de points)
+    """
+    # Passage des Tracks en lignes
+    ligne1 = []
+    ligne2 = []
+    liste_coords_1 = trace1.getCoord()
+    liste_coords_2 = trace2.getCoord()
+    for coords in liste_coords_1 :
+        ligne1.append([coords.getX(), coords.getY(), coords.getZ()])
+    for coords in liste_coords_2 :
+        ligne2.append([coords.getX(), coords.getY(), coords.getZ()])
+    ligne1 = np.array(ligne1)
+    ligne2 = np.array(ligne2)
+
+    # Calcul de la matrice des distances euclidiennes entre chaque point de ligne1 et ligne2
+    # ligne1: shape (N, D), ligne2: shape (M, D) (D -> dimension : 2 ou 3)
+    diff = ligne1[:, np.newaxis, :] - ligne2[np.newaxis, :, :]
+    dist_matrix = np.linalg.norm(diff, axis=-1)
+    print(np.shape(dist_matrix))
+    print(dist_matrix)
+
+    # Pour chaque point de ligne1, la moyenne des distances vers ligne2
+    d = np.mean(dist_matrix)
+    return d
+
+
 
 
 def objectif(reseau, gps_tracks) :
@@ -145,24 +173,25 @@ if __name__ == "__main__" :
     tkl.seed(110) #bloque l'aléatoire
     tracks = traces_random(nb=2, sinuosite=0.1)
 
+    distance_moyenne(tracks[0], tracks[1])
 
-    # ----------------------------------------------------------
-    # Bruitage 
-    # ----------------------------------------------------------
+    # # ----------------------------------------------------------
+    # # Bruitage 
+    # # ----------------------------------------------------------
 
-    gps_tracks = bruitage(tracks, 5)
+    # gps_tracks = bruitage(tracks, 5)
 
 
-    # ----------------------------------------------------------
-    # Generer le réseau
-    # ----------------------------------------------------------
+    # # ----------------------------------------------------------
+    # # Generer le réseau
+    # # ----------------------------------------------------------
 
-    # reseau = random_tirage_track(gps_tracks, nbre_arcs=2)
-    tkl.seed(2)
-    reseau = traces_random(nb=2, sinuosite=0.5)
-    # reseau = tracks.copy() 
-    # supprimer_arc(reseau)
-    # ajouter_arc(reseau, tracks)
+    # # reseau = random_tirage_track(gps_tracks, nbre_arcs=2)
+    # tkl.seed(2)
+    # reseau = traces_random(nb=2, sinuosite=0.5)
+    # # reseau = tracks.copy() 
+    # # supprimer_arc(reseau)
+    # # ajouter_arc(reseau, tracks)
 
 
     # ----------------------------------------------------------
@@ -172,19 +201,20 @@ if __name__ == "__main__" :
     plt.figure(figsize=(8, 6))
 
     # Affichage des traces
-    for t in gps_tracks:
+    
+    for t in tracks:
         plt.plot(t.getX(), t.getY(), linewidth=2, color='black')
     
-    # Reseau par dessus
-    for t in reseau:
-        plt.plot(t.getX(), t.getY(), linewidth=1, color='blue')
+    # # Reseau par dessus
+    # for t in reseau:
+    #     plt.plot(t.getX(), t.getY(), linewidth=1, color='blue')
 
     
     # -----------------------------------------------------------
     # Fonction objectif
     # -----------------------------------------------------------
     
-    print("resultat obj ", objectif(reseau, gps_tracks))
+    # print("resultat obj ", objectif(reseau, gps_tracks))
 
     plt.show()
     
