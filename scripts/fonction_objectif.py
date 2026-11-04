@@ -100,16 +100,16 @@ def distance_moyenne(trace1, trace2):
 def objectif(reseau, gps_tracks) :
     """
     distance de hausdorf entre chaque arc et sa trace la plus "proche".
-    return : moyenne des scores de chaque arc
+    return : moyenne des couts de chaque arc
     """
     m = len(gps_tracks)
     n = len(reseau)
     # print("Nombre de comparaisons :", n*m)
 
-    scores = []
+    couts = []
     for i in range(n): # Pour chaque arc du réseau
         # print("arc =", i)
-        score_i = math.inf
+        cout_i = math.inf
         arc_i = reseau.getTrack(i)
 
 
@@ -119,14 +119,15 @@ def objectif(reseau, gps_tracks) :
 
             # Calcul de la distance de hausdorf
             dH = distance_hausdorff(arc_i, trace_j)
-            if score_i > dH:
-                score_i = dH
-        scores.append(score_i)
+            if cout_i > dH:
+                cout_i = dH
+        couts.append(cout_i)
+        print(cout_i)
 
-    # print(scores)
+    # print(couts)
     for j in range(m): # Pour chaque trace
         # print("trace =", j)
-        score_j = math.inf
+        cout_j = math.inf
         trace_j = gps_tracks.getTrack(j)
 
 
@@ -136,24 +137,25 @@ def objectif(reseau, gps_tracks) :
 
             # Calcul de la distance de hausdorf
             dH = distance_hausdorff(trace_j, arc_i)
-            if score_j > dH:
-                score_j = dH
-        scores.append(score_j)
+            if cout_j > dH:
+                cout_j = dH
+        couts.append(cout_j)
+        print(cout_j)
 
         
-    # print(scores)
-    score = np.mean(scores)
+    # print(couts)
+    cout = np.mean(couts)
 
      
     ### Intersection
     for i in range(n): # Pour chaque arc du réseau
         arc_i = reseau.getTrack(i)
         if tkl.util.intersects(arc_i, arc_i): # Autointersections
-            score += 10
+            cout += 10
         for j in range(m):
             if tkl.util.intersects(arc_i, arc_i): # Intersections
-                score += 10
-    return score
+                cout += 10
+    return cout
 
 
 
@@ -173,25 +175,24 @@ if __name__ == "__main__" :
     tkl.seed(110) #bloque l'aléatoire
     tracks = traces_random(nb=2, sinuosite=0.1)
 
-    distance_moyenne(tracks[0], tracks[1])
 
-    # # ----------------------------------------------------------
-    # # Bruitage 
-    # # ----------------------------------------------------------
+    # ----------------------------------------------------------
+    # Bruitage 
+    # ----------------------------------------------------------
 
-    # gps_tracks = bruitage(tracks, 5)
+    gps_tracks = bruitage(tracks, 5)
 
 
-    # # ----------------------------------------------------------
-    # # Generer le réseau
-    # # ----------------------------------------------------------
+    # ----------------------------------------------------------
+    # Generer le réseau
+    # ----------------------------------------------------------
 
-    # # reseau = random_tirage_track(gps_tracks, nbre_arcs=2)
-    # tkl.seed(2)
-    # reseau = traces_random(nb=2, sinuosite=0.5)
-    # # reseau = tracks.copy() 
-    # # supprimer_arc(reseau)
-    # # ajouter_arc(reseau, tracks)
+    # reseau = random_tirage_track(gps_tracks, nbre_arcs=2)
+    tkl.seed(2)
+    reseau = traces_random(nb=2, sinuosite=0.5)
+    # reseau = tracks.copy() 
+    # supprimer_arc(reseau)
+    # ajouter_arc(reseau, tracks)
 
 
     # ----------------------------------------------------------
@@ -203,18 +204,18 @@ if __name__ == "__main__" :
     # Affichage des traces
     
     for t in tracks:
-        plt.plot(t.getX(), t.getY(), linewidth=2, color='black')
+        plt.plot(t.getX(), t.getY(), linewidth=1, color='black')
     
-    # # Reseau par dessus
-    # for t in reseau:
-    #     plt.plot(t.getX(), t.getY(), linewidth=1, color='blue')
+    # Reseau par dessus
+    for t in reseau:
+        plt.plot(t.getX(), t.getY(), linewidth=2, color='blue')
 
     
     # -----------------------------------------------------------
     # Fonction objectif
     # -----------------------------------------------------------
     
-    # print("resultat obj ", objectif(reseau, gps_tracks))
+    print("resultat obj ", objectif(reseau, gps_tracks))
 
     plt.show()
     
