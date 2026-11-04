@@ -114,7 +114,18 @@ def objectif(reseau, gps_tracks) :
 
         
     # print(scores)
-    return np.mean(scores)
+    score = np.mean(scores)
+
+     
+    ### Intersection
+    for i in range(n): # Pour chaque arc du réseau
+        arc_i = reseau.getTrack(i)
+        if tkl.util.intersects(arc_i, arc_i): # Autointersections
+            score += 10
+        for j in range(m):
+            if tkl.util.intersects(arc_i, arc_i): # Intersections
+                score += 10
+    return score
 
 
 
