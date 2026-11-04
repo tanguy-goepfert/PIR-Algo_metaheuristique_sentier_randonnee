@@ -123,7 +123,12 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         perturbations[action](reseau_potentiel,traces)
         #evaluation : si on minimise la fonction cout, on accepte, sinon on
         #tire au sort avec proba cout(i)/cout(i+1 potentiel)
-        if random.random()<=(objectif(reseau,traces)/objectif(reseau_potentiel,traces))**4:
+        if random.random()<=min(1,
+                                np.exp(
+                                    -(objectif(reseau_potentiel,traces)-objectif(reseau,traces))
+                                    /(10/np.log(0.8)*(0.99**(i//100))) #100 le pas de decroissance
+                                    ) #10 à peu près une variation de cout
+                                ):
             reseau=reseau_potentiel
         
     return reseau
