@@ -1,5 +1,6 @@
 from initialisation_jeu_de_trace import *
 import math
+import random
 
 # Génération aléatoire indépendante
 rng = random.Random()
@@ -118,6 +119,46 @@ def deplacer_vertex(reseau, tracks):
     # Réinsérer l'arc dans réseau
     reseau.addTrack(arc_a_modif)
 
+def deplacer_vertex_prox(reseau,tracks):
+    """
+    Déplace un point d'un arc du réseau
+    """
+    # Séléction de l'arc à modifier
+    r = rng.randint(0, len(reseau) - 1) # Indice aléatoire de la trace à supprimer
+    arc_a_modif = reseau.getTrack(r)
+
+    # Supprimer l'ancien arc
+    reseau.removeTrack(arc_a_modif)
+
+    ### Modification de l'arc
+
+    # Indice aléatoire du vertex à déplacer
+    indice = rng.randint(0, len(arc_a_modif) - 1) 
+
+
+    if indice < 0 or indice >= arc_a_modif.size():
+        print("Indice invalide")
+        return False
+
+    # Récupérer le point à déplacer
+    observation = arc_a_modif.getObs(indice)
+    x=observation.position.getX()
+    y=observation.position.getY()
+    
+    
+    # Nouvelles coordonnées aléatoires
+    nouveau_x = x + random.gauss()
+    nouveau_y = y + random.gauss()
+
+    # Modifier ses coordonnées
+    observation.position.setX(nouveau_x)
+    observation.position.setY(nouveau_y)
+
+    # Réinsérer l'observation modifiée dans l'arc
+    arc_a_modif.setObs(indice, observation)
+
+    # Réinsérer l'arc dans réseau
+    reseau.addTrack(arc_a_modif)
 
 
 if __name__ == "__main__" :
