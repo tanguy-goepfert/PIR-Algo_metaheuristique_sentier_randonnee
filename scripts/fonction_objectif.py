@@ -87,8 +87,6 @@ def distance_moyenne(trace1, trace2):
     # ligne1: shape (N, D), ligne2: shape (M, D) (D -> dimension : 2 ou 3)
     diff = ligne1[:, np.newaxis, :] - ligne2[np.newaxis, :, :]
     dist_matrix = np.linalg.norm(diff, axis=-1)
-    print(np.shape(dist_matrix))
-    print(dist_matrix)
 
     # Pour chaque point de ligne1, la moyenne des distances vers ligne2
     d = np.mean(dist_matrix)
