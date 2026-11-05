@@ -190,11 +190,11 @@ if __name__=="__main__" :
     
     actions = [deplacer_vertex]
     
-    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=5) #modèle : un compteur, perturbation +1 -1
+    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=1) #modèle : un compteur, perturbation +1 -1
     print("Score initial : ", objectif(reseau, gps_tracks))
     print("Score solution : ", objectif(solution, gps_tracks))
 
     # Affichage solution
     for s in solution:
         plt.plot(s.getX(), s.getY(), linewidth=1, color='red')
-    #plt.show()
+    plt.show()

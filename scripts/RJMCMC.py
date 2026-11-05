@@ -133,61 +133,7 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         
     return reseau
 
-def RJMCMC_reseau_traces_naive(r0,traces,perturbations,objectif,arret,prob_perturbations=[]):
-    """
-    Parameters
-    ----------
-    r0 : TYPE tracklib Trackcollection
-        DESCRIPTION : reseau a l'etat initial
-    traces : TYPE tracklib Trackcollection
-        DESCRIPTION : traces a partir desquelles on veut construire le reseau
-    perturbations : TYPE liste de fonctions (reseau -> reseau)
-        DESCRIPTION : une liste contenant la liste de toutes les actions à
-        explorer.
-    objectif : TYPE fonction (modele -> float)
-        DESCRIPTION : Evalue la qualite d'un reseau (de l'état donné d'un modèle)
-        pour l'instant considéré comme 
-    arret : TYPE int
-        DESCRIPTION : Le nombre de saut a effectuer 
-        (changer en rayon de convergence ?)
-        
-    prob_perturbations : TYPE liste de float
-        DESCRIPTION : contient les probabilites d'effectuer chaque action lors
-        des sauts. (refaire la fonction avec proba variables ?)
-        vide par defaut pour contenir une equiprobabilite
 
-    Returns
-    -------
-    etats : TYPE : liste de reseaux
-        DESCRIPTION : contient tous les sauts effectues par le RJMCMC (tires au
-        au sort puis valides)
-        
-    suivi_sauts : TYPE : liste de couples d'entiers
-        DESCRIPTION : la liste des couples (indice d'action et booleen d'acceptation) 
-    """
-    #initialisation
-    reseau = r0.copy()
-    reseau_potentiel=reseau.copy()
-    action=-1 #memoire de l'indice de la perturbation selectionnee par tirage au sort
-    indices_actions=list(range(len(perturbations))) 
-
-    if prob_perturbations==[]: #equiprobatilite
-        prob_perturbations = np.ones(len(perturbations))/len(perturbations)
-    for i in range(arret):
-        print("itération rjmcmc", i)
-        #tirage_au_sort, d'une des perturbations avec la loi de probabilite 
-        #en entree
-        action=random.choices(indices_actions,prob_perturbations)[0]
-        #saut
-        reseau_potentiel=reseau.copy()
-        perturbations[action](reseau_potentiel,traces)
-        #evaluation : si on minimise la fonction cout, on accepte, sinon on
-        #tire au sort avec proba cout(i)/cout(i+1 potentiel)
-        if objectif(reseau_potentiel,traces) < objectif(reseau,traces) :
-            reseau=reseau_potentiel
-            print(objectif(reseau_potentiel,traces))
-        
-    return reseau
 
 
 if __name__=="__main__" :

@@ -120,7 +120,7 @@ def objectif(reseau, gps_tracks) :
             if cout_i > dH:
                 cout_i = dH
         couts.append(cout_i)
-        print(cout_i)
+        # print(cout_i)
 
     # print(couts)
     for j in range(m): # Pour chaque trace
@@ -138,11 +138,26 @@ def objectif(reseau, gps_tracks) :
             if cout_j > dH:
                 cout_j = dH
         couts.append(cout_j)
-        print(cout_j)
+        # print(cout_j)
 
         
     # print(couts)
     cout = np.mean(couts)
+
+    ### Distance moyenne 
+    for i in range(n): # Pour chaque arc du réseau
+        # print("arc =", i)
+        arc_i = reseau.getTrack(i)
+
+
+        for j in range(m): # Distance avec chaque trace
+            # print("trace =", j)
+            trace_j = gps_tracks.getTrack(j)
+
+            # Calcul de la distance moyenne
+            dM = distance_moyenne(arc_i, trace_j)
+            couts.append(dM)
+    cout += np.mean(couts)
 
      
     ### Intersection
