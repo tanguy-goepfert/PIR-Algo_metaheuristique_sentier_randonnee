@@ -126,7 +126,7 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         rapport = min(1, 
                       np.exp(
                           -(objectif(reseau_potentiel,traces)-objectif(reseau,traces))
-                          /(10/np.log(0.8)/(0.99**(i//100))) #100 le pas de decroissance
+                          /(-10/np.log(0.8)/(0.99**(i//100))) #100 le pas de decroissance
                           ) #10 à peu près une variation de cout
                     )
 
@@ -190,7 +190,7 @@ if __name__=="__main__" :
     
     actions = [deplacer_vertex]
     
-    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=1) #modèle : un compteur, perturbation +1 -1
+    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=100) #modèle : un compteur, perturbation +1 -1
     print("Score initial : ", objectif(reseau, gps_tracks))
     print("Score solution : ", objectif(solution, gps_tracks))
 
