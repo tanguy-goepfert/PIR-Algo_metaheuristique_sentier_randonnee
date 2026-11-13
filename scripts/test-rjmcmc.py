@@ -73,6 +73,28 @@ def RJMCMC(modele,perturbations,objectif,arret,prob_perturbations=[]):
         
     return etats,suivi_sauts
 
+
+def temperature(i, delta=10, p0=0.5, alpha=2, palier=5):
+    """
+    Renvoie une température adaptée à une certaine itération du rjmcmc.
+    ---------
+    i : TYPE integer
+            DESCRIPTION : iteration en question
+    delta : TYPE integer
+            DESCRIPTION : Dégradation (cout)
+    p0 : TYPE float
+            DESCRIPTION : probabilité d'acceptation initiale (plus p0 est proche de 1, plus T est grand (exploration forte)
+    plus p0 est proche de 1, plus T₀ est grand (exploration forte).
+    alpha : TYPE integer
+                DESCRIPTION : facteur de refroidissement par palier : plus alpha est grand, plus la descente est brutale
+    palier : TYPE integer
+                DESCRIPTION : Nombre d'itération avant de changer de palier
+    """
+    T0 = -delta / np.log(p0)
+    return T0 / (alpha ** (i // palier))
+
+
+
 def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbations=[]):
     """
     Parameters
@@ -123,44 +145,40 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         perturbations[action](reseau_potentiel,traces)
         #evaluation : si on minimise la fonction cout, on accepte, sinon on
         #tire au sort avec proba cout(i)/cout(i+1 potentiel)
+
+        temp = temperature(i)
+        
         rapport = min(1, 
                       np.exp(
-                          -(objectif(reseau_potentiel,traces)-objectif(reseau,traces))
-                          /(-10/np.log(0.8)/(0.99**(i//100))) #100 le pas de decroissance
-                          ) #10 à peu près une variation de cout
+                            -(objectif(reseau_potentiel,traces)-objectif(reseau,traces))
+                            /temp 
+                            ) 
                     )
 
         k = random.random()
-        
+
         print("Cout actuel = ", objectif(reseau,traces))
         print("Cout potentiel = ", objectif(reseau_potentiel,traces))
+
         print("Rapport = ", rapport)
         print("k = ", k)
+        print("Température = ", temp)
 
 
-
-        if k<=min(1,
-                                np.exp(
-                                    -(objectif(reseau_potentiel,traces)-objectif(reseau,traces))
-                                    /(-10/np.log(0.8)/(0.99**(i//100))) #100 le pas de decroissance
-                                    ) #10 à peu près une variation de cout
-                                ):
+        if rapport == 1 :
             reseau=reseau_potentiel
             print("OK")
-            print()
+        elif k <= rapport :
+            reseau=reseau_potentiel
+            print("BOF MAIS OK")
+        else :
+            print("NON")
+        print()
         
     return reseau
 
 
 if __name__=="__main__" :
-    # #test du rjmcmc avec 
-    # def plusun(r,t):
-    #     return r+1
-    # def moinsun(r,t):
-    #     return r-1
-    # def cout(r,t): #distance10 à 50
-    #     return max((r-50)**10,1)#evite la division par zéro
-
 
     ### Generer les traces GPS
     tkl.seed(110) #bloque l'aléatoire
@@ -190,7 +208,7 @@ if __name__=="__main__" :
     
     actions = [deplacer_vertex]
     
-    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=100) #modèle : un compteur, perturbation +1 -1
+    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=1000) #modèle : un compteur, perturbation +1 -1
     print("Score initial : ", objectif(reseau, gps_tracks))
     print("Score solution : ", objectif(solution, gps_tracks))
 
