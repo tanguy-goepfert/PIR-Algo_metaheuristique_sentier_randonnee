@@ -29,13 +29,13 @@ def distance_hausdorff(trace, arc):
     diff = ligne_trace[:, np.newaxis, :] - ligne_arc[np.newaxis, :, :]
     dist_matrix = np.linalg.norm(diff, axis=-1)
 
-    # Pour chaque point de ligne_trace, la plus petite distance vers ligne_arc
+    # # Pour chaque point de ligne_trace, la plus petite distance vers ligne_arc
     H12 = np.min(dist_matrix, axis=1)
-    # # Pour chaque point de ligne_arc, la plus petite distance vers ligne_trace
-    # H21 = np.min(dist_matrix, axis=0)
+    # Pour chaque point de ligne_arc, la plus petite distance vers ligne_trace
+    H21 = np.min(dist_matrix, axis=0)
 
-    # Le maximum de ces minimums
-    return np.max(H12)
+    # La somme des maximums de ces minimums
+    return np.max(H12) + np.max(H21)
 
 def distance_moyenne(trace1, trace2):
     """
