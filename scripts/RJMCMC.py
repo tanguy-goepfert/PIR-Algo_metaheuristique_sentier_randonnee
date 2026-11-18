@@ -10,6 +10,7 @@ import numpy as np
 import random
 from modification_reseau import *
 from fonction_objectif import *
+import time
 
 #%% fonctions
 
@@ -130,6 +131,7 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         DESCRIPTION : la liste des couples (indice d'action et booleen d'acceptation) 
     """
     #initialisation
+    t0=time.time()
     reseau = r0.copy()
     reseau_potentiel=reseau.copy()
     action=-1 #memoire de l'indice de la perturbation selectionnee par tirage au sort
@@ -158,6 +160,8 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
     
     for i in range(arret):
         print("itération rjmcmc", i)
+        ti=time.time()
+        print('temps_calcul = ', ti-t0)
         #tirage_au_sort, d'une des perturbations avec la loi de probabilite 
         #en entree
         action=random.choices(indices_actions,prob_perturbations)[0]
@@ -193,7 +197,8 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         else :
             print("NON")
         print()
-        
+    tf=time.time()
+    print("temps de calcul final = ",tf-t0)    
     return reseau
 
 
@@ -224,7 +229,7 @@ if __name__=="__main__" :
     for t in reseau:
         plt.plot(t.getX(), t.getY(), linewidth=1, color='blue')
 
-    
+
 
 
     ### RJMCMC
@@ -232,8 +237,8 @@ if __name__=="__main__" :
     actions = [deplacer_vertex_prox]
     
     solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=100)
-    print("Score initial : ", objectif(reseau, gps_tracks))
-    print("Score solution : ", objectif(solution, gps_tracks))
+    print("Score initial : ", objectif(reseau=reseau,gps_tracks= gps_tracks))
+    print("Score solution : ", objectif(reseau = solution, gps_tracks= gps_tracks))
 
     # Affichage solution
     for s in solution:
