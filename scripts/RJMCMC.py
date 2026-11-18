@@ -184,8 +184,8 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         print("Cout potentiel = ", objectif(reseau=reseau_potentiel,gps_tracks=traces))
 
         print("Rapport = ", rapport)
-        # print("k = ", k)
-        # print("Température = ", temp)
+        print("k = ", k)
+        print("Température = ", temp)
 
 
         if rapport == 1 :
