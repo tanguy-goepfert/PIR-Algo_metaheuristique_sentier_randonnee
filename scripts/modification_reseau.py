@@ -148,8 +148,8 @@ def deplacer_vertex_prox(reseau,tracks):
     
     
     # Nouvelles coordonnées aléatoires
-    nouveau_x = x + random.gauss()
-    nouveau_y = y + random.gauss()
+    nouveau_x = x + random.gauss() * 10
+    nouveau_y = y + random.gauss() * 10
 
     # Modifier ses coordonnées
     observation.position.setX(nouveau_x)
