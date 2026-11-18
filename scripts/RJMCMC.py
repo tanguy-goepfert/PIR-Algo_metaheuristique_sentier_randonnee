@@ -189,7 +189,11 @@ if __name__=="__main__" :
     ### Initialisation d'un premier réseau 
     tkl.seed(2)
     reseau = traces_random(nb=2, sinuosite=0.5)
-
+    reseau[0].resample(npts=50)
+    reseau[1].resample(npts=50)
+    
+    for i in reseau:
+        print(len(i))
     ### Affichage
     plt.figure(figsize=(8, 6))
 
@@ -206,7 +210,7 @@ if __name__=="__main__" :
 
     ### RJMCMC
     
-    actions = [deplacer_vertex]
+    actions = [deplacer_vertex_prox]
     
     solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=100) #modèle : un compteur, perturbation +1 -1
     print("Score initial : ", objectif(reseau, gps_tracks))
