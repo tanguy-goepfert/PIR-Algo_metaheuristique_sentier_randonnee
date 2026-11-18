@@ -1,9 +1,11 @@
 import math
 import statistics
-from initialisation_jeu_de_trace import *
-from modification_reseau import *
 import numpy as np
 import time
+from shapely.geometry import LineString
+from initialisation_jeu_de_trace import *
+from modification_reseau import *
+
      
 def ecart_traces(trace1, trace2):
     """
@@ -93,6 +95,25 @@ def distance_moyenne(trace1, trace2):
     return d
 
 
+def autointersection(arc) :
+    """
+    Test si un arc s'autointersecte. True si auto intersection, False sinon
+    """
+
+    liste = []
+    for i in range(len(arc)) :
+        obs = arc.getObs(i)
+        pos = (obs.position.getX(), obs.position.getY())
+        liste.append(pos)
+
+    poly = LineString(liste)
+    intersection = not poly.is_simple
+    if intersection : print("Intersection : ", intersection)
+        
+    return intersection
+
+
+
 
 
 def objectif(reseau, gps_tracks) :
@@ -163,10 +184,11 @@ def objectif(reseau, gps_tracks) :
     ### Intersection
     for i in range(n): # Pour chaque arc du réseau
         arc_i = reseau.getTrack(i)
-        if tkl.util.intersects(arc_i, arc_i): # Autointersections
-            cout += 10
-        for j in range(m):
-            if tkl.util.intersects(arc_i, arc_i): # Intersections
+        if autointersection(arc_i): # Autointersections
+            cout += 100
+        for j in range(n):
+            arc_j = reseau.getTrack(j)
+            if tkl.util.intersects(arc_i, arc_j): # Intersections
                 cout += 10
     return cout
 
