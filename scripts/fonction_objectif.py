@@ -223,4 +223,5 @@ if __name__ == "__main__" :
     print("resultat obj ", objectif(reseau, gps_tracks))
 
     plt.show()
-    
+
+    #Bloblo
