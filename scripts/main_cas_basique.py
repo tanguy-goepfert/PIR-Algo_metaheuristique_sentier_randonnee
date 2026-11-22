@@ -16,38 +16,41 @@ if __name__=="__main__":
     ### Generer les traces GPS
     tkl.seed(110) #bloque l'aléatoire
     tracks = traces_random(nb=1, sinuosite=0.1)
+    # Sous échantillonage
+    tracks[0].resample(npts=30)
+
     # Bruitage 
-    gps_tracks = bruitage(tracks, 5)
+    gps_tracks = bruitage(tracks, 3)
 
     ### Initialisation d'un premier réseau 
     tkl.seed(2)
     reseau = traces_random(nb=1, sinuosite=0.5)
     # Sous échantillonage
-    reseau[0].resample(npts=50)
+    reseau[0].resample(npts=30)
 
 
 
-    ### Affichage
-    plt.figure(figsize=(8, 6))
+    # ### Affichage
+    # plt.figure(figsize=(8, 6))
 
-    # Affichage des traces
-    for t in gps_tracks:
-        plt.plot(t.getX(), t.getY(), linewidth=2, color='black')
+    # # Affichage des traces
+    # for t in gps_tracks:
+    #     plt.plot(t.getX(), t.getY(), linewidth=1, color='black')
     
-    # Reseau par dessus
-    for t in reseau:
-        plt.plot(t.getX(), t.getY(), linewidth=1, color='blue')
+    # # Reseau par dessus
+    # for t in reseau:
+    #     plt.plot(t.getX(), t.getY(), linewidth=3, color='blue')
 
 
 
     ### RJMCMC
     actions = [deplacer_vertex_prox]
     
-    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=100)
-    print("Score initial : ", objectif(reseau=reseau, gps_tracks=gps_tracks))
-    print("Score solution : ", objectif(reseau=solution, gps_tracks=gps_tracks))
+    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=1000, plot=True)
+    print("Score initial : ", objectif(reseau=reseau, gps_tracks=gps_tracks, infos=True))
+    print("Score solution : ", objectif(reseau=solution, gps_tracks=gps_tracks, infos=True))
 
     # Affichage solution
     for s in solution:
-        plt.plot(s.getX(), s.getY(), linewidth=1, color='red')
-    plt.show()
+        plt.plot(s.getX(), s.getY(), linewidth=2, color='red')
+    # plt.show()

@@ -79,10 +79,43 @@ def autointersection(arc) :
         
     return intersection
 
+def point2vec(point1, point2):
+    x = point2[0]-point1[0]
+    y = point2[1]-point1[1]
+    return (x,y)
+
+def produit_scalaire(u,v):
+    return u[0] * v[0] + u[1] * v[1]
+
+def angle_deviation_moyen(arc):
+    """
+    Calcule l'angle de déviation moyen en degres entre les segments d'une ligne.
+    """
+    liste = []
+    for i in range(len(arc)-1) :
+        if i == 0 :
+            continue
+        # i = 1
+        pos_i = (arc.getObs(i).position.getX(), arc.getObs(i).position.getY())
+        pos_i_moins1 = (arc.getObs(i-1).position.getX(), arc.getObs(i-1).position.getY())
+        pos_i_plus1 = (arc.getObs(i+1).position.getX(), arc.getObs(i+1).position.getY())
+        vec_u = point2vec(pos_i_moins1, pos_i)
+        vec_v = point2vec(pos_i, pos_i_plus1)
+        norme_u = np.linalg.norm(vec_u)
+        norme_v = np.linalg.norm(vec_v)
+        if norme_u == 0 or norme_v == 0: # Division par 0, deux points se superposent
+            continue
+        # Calcul de l'angle
+        cos_theta = produit_scalaire(vec_u, vec_v) / (norme_u * norme_v)
+        theta = np.arccos(np.clip(cos_theta, -1.0, 1.0)) # Protection en cas d'arrondi
+
+        liste.append(theta)
+
+    return np.mean(liste)*180/np.pi
+        
 
 
-
-def objectif(gps_tracks, reseau) :
+def objectif(gps_tracks, reseau, infos=False) :
     """
     distance de hausdorf entre chaque arc et sa trace la plus "proche".
     return : moyenne des couts de chaque arc
@@ -101,50 +134,33 @@ def objectif(gps_tracks, reseau) :
             arc_j = reseau.getTrack(j)
             
             # Calcul de la distance de hausdorf
-            H12 = distance_hausdorff(trace_i, arc_j)
-            H_i.append(H12)
+            H12_21 = distance_hausdorff(trace_i, arc_j)
+            H_i.append(H12_21)
 
         # On garde la distance de Hausdorf min
         H_i_min = min(H_i)
         H.append(H_i_min)
 
-    cout_H = np.mean(H)  
-
-    # # print(couts)
-    # for j in range(m): # Pour chaque trace
-    #     # print("trace =", j)
-    #     cout_j = math.inf
-    #     trace_j = gps_tracks.getTrack(j)
+    cout_H = np.mean(H)
 
 
-    #     for i in range(n): # Pour chaque arc du réseau
-    #         # print("arc =", i)
-    #         arc_i = reseau.getTrack(i)
+    ### Distance moyenne 
+    M = []
+    for i in range(n): # Pour chaque trace
+        trace_i = gps_tracks.getTrack(i)
+        M_i = []
 
-    #         # Calcul de la distance de hausdorf
-    #         dH = distance_hausdorff(trace_j, arc_i)
-    #         if cout_j > dH:
-    #             cout_j = dH
-    #     couts.append(cout_j)
-    #     # print(cout_j)
+        for j in range(m): # Distance avec chaque arc
+            arc_j = reseau.getTrack(j)
 
-
-
-    # ### Distance moyenne 
-    # couts_M = []
-    # for i in range(n): # Pour chaque arc du réseau
-    #     # print("arc =", i)
-    #     arc_i = reseau.getTrack(i)
-
-
-    #     for j in range(m): # Distance avec chaque trace
-    #         # print("trace =", j)
-    #         trace_j = gps_tracks.getTrack(j)
-
-    #         # Calcul de la distance moyenne
-    #         dM = distance_moyenne(arc_i, trace_j)
-    #         couts_M.append(dM)
-    # cout_M = np.mean(couts_M)
+            # Calcul de la distance moyenne
+            dM = distance_moyenne(trace_i, arc_j)
+            M_i.append(dM)
+        # On garde la distance de Hausdorf min : seulement la distance moyenne avec l'arc le plus proche
+        M_i_min = min(H_i)
+        M.append(H_i_min)
+        
+    cout_M = np.mean(M)
 
      
     ### Intersection
@@ -158,7 +174,20 @@ def objectif(gps_tracks, reseau) :
             if tkl.util.intersects(arc_j, arc_k): # Intersections avec d'autres arcs
                 couts_I += 10
 
-    cout = cout_H  + couts_I #+ cout_M
+    
+    ### Déviation
+    cout_D = 0
+    for j in range(m): # Pour chaque arc
+        arc_j = reseau.getTrack(j)
+        D_j = angle_deviation_moyen(arc_j)
+        cout_D += D_j
+    cout_D = cout_D*2
+
+    cout = cout_H  + couts_I + cout_M + cout_D
+
+    # Pour débugger
+    if infos :
+        print("H: ",cout_H, "I: ", couts_I, "M: ", cout_M, "D: ", cout_D)
     
     return cout
 
@@ -178,7 +207,7 @@ if __name__ == "__main__" :
     # ----------------------------------------------------------
 
     tkl.seed(110) #bloque l'aléatoire
-    tracks = traces_random(nb=2, sinuosite=0.1)
+    tracks = traces_random(nb=1, sinuosite=0.1)
 
 
     # ----------------------------------------------------------
@@ -194,10 +223,11 @@ if __name__ == "__main__" :
 
     # reseau = random_tirage_track(gps_tracks, nbre_arcs=2)
     tkl.seed(2)
-    reseau = traces_random(nb=2, sinuosite=0.5)
-    # reseau = tracks.copy() 
-    # supprimer_arc(reseau)
-    # ajouter_arc(reseau, tracks)
+    reseau = traces_random(nb=1, sinuosite=0.5)
+    # Sous échantillonage
+    reseau[0].resample(npts=5)
+
+    angle_deviation_moyen(reseau[0])
 
 
     # ----------------------------------------------------------
@@ -206,24 +236,24 @@ if __name__ == "__main__" :
 
     plt.figure(figsize=(8, 6))
 
-    # Affichage des traces
+    # # Affichage des traces
     
-    for t in tracks:
-        plt.plot(t.getX(), t.getY(), linewidth=1, color='black')
+    # for t in tracks:
+    #     plt.plot(t.getX(), t.getY(), linewidth=1, color='black')
     
     # Reseau par dessus
     for t in reseau:
         plt.plot(t.getX(), t.getY(), linewidth=2, color='blue')
 
     
-    # -----------------------------------------------------------
-    # Fonction objectif
-    # -----------------------------------------------------------
+    # # -----------------------------------------------------------
+    # # Fonction objectif
+    # # -----------------------------------------------------------
     
-    print("resultat obj ", objectif(reseau, gps_tracks))
+    # print("resultat obj ", objectif(reseau, gps_tracks))
 
     plt.show()
 
 
-    #Blablabla ---> titi et grosminet
+    
     
