@@ -28,10 +28,11 @@ def init_affichage(reseau, traces):
     (ligne_interactive,) = ax.plot([], [])
 
 
-def afficher(arc, pause=0.05):
+def afficher(arc, iteration, pause=0.05):
     xs, ys = arc.getX(), arc.getY()  # sépare les x et les y
     
     ligne_interactive.set_data(xs, ys)
+    ax.set_title(f"Itération {iteration}")   # mise à jour du titre
     ax.relim()
     ax.autoscale_view()
     fig.canvas.draw_idle()
@@ -164,7 +165,7 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
             print("OK")
             # Affichage
             if plot == True:
-                afficher(reseau[0])
+                afficher(reseau[0], iteration=i)
         elif k <= rapport :
             reseau=reseau_potentiel
             print("BOF MAIS OK")

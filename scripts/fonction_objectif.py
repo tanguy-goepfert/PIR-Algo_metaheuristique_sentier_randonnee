@@ -181,7 +181,7 @@ def objectif(gps_tracks, reseau, infos=False) :
         arc_j = reseau.getTrack(j)
         D_j = angle_deviation_moyen(arc_j)
         cout_D += D_j
-    cout_D = cout_D*2
+    #cout_D = cout_D/2
 
     cout = cout_H  + couts_I + cout_M + cout_D
 

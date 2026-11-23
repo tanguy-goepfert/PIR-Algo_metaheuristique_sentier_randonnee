@@ -26,7 +26,7 @@ if __name__=="__main__":
     tkl.seed(2)
     reseau = traces_random(nb=1, sinuosite=0.5)
     # Sous échantillonage
-    reseau[0].resample(npts=30)
+    reseau[0].resample(npts=12)
 
 
 
@@ -46,7 +46,7 @@ if __name__=="__main__":
     ### RJMCMC
     actions = [deplacer_vertex_prox]
     
-    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=1000, plot=True)
+    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=30000, plot=True)
     print("Score initial : ", objectif(reseau=reseau, gps_tracks=gps_tracks, infos=True))
     print("Score solution : ", objectif(reseau=solution, gps_tracks=gps_tracks, infos=True))
 
