@@ -1,0 +1,57 @@
+Dans la fonction objectif
+1. Distance point par point au lieu de Hausdorff
+Avant. distance_hausdorff renvoyait max(H12) + max(H21), où H12 donne pour chaque point de la trace sa distance au point le plus proche de l'arc. Seul le point le plus éloigné comptait. Si on déplaçait un autre vertex, le max ne changeait pas et le coût non plus. C'est pour cela que 70 % des déplacements de deplacer_vertex_prox donnaient un delta exactement nul. L'algorithme n'avait aucune information pour savoir dans quelle direction aller.
+Maintenant. Pour chaque point GPS, on calcule la distance au point de réseau le plus proche et on somme sur tous les points GPS. Ce coût est une fonction de Huber de d/σ : quadratique (0.5·z²) jusqu'à 2σ, linéaire au-delà. Chaque vertex déplacé change la distance des points GPS voisins, donc le coût varie à chaque saut (0 % de deltas nuls sur le cas de test). Le côté linéaire donne un coût qui continue de décroître quand le réseau se rapproche, même s'il est très loin au départ. Il limite aussi l'influence d'un point GPS aberrant.
+
+
+2. Plus de « une trace = un arc »
+Avant. Pour chaque trace, objectif calculait la distance avec chaque arc, puis gardait min(H_i). Si la trace passe par deux arcs, chacun n'en couvre qu'une partie, et le max de Hausdorff est grand pour les deux. Un réseau correct découpé en plusieurs arcs avait donc un mauvais score.
+Maintenant. Tous les arcs sont fusionnés en un seul nuage de points et chaque point GPS prend son plus proche voisin dans ce nuage, quel que soit l'arc. Le découpage en arcs ne change plus le score.
+
+
+3. Terme de couverture réseau → GPS
+Avant. Seules les traces étaient comparées au réseau, jamais l'inverse. Un arc situé loin de toute trace ne coûtait rien, sauf s'il croisait un autre arc.
+Maintenant. Chaque échantillon du réseau (tous les 2 m) est comparé à son point GPS le plus proche, avec le même coût de Huber. Il est multiplié par pas / ds_gps (2 m divisés par l'espacement moyen entre points GPS), pour que le terme soit en « équivalent de points GPS » et comparable au terme de données.
+Limite. bruitage(tracks, 5) crée 5 copies de chaque trace : le terme de données est donc environ 5 fois plus dense par mètre que le terme de couverture. Dans main_v2, la couverture restait élevée à la fin. poids_couverture permet d'augmenter son poids, mais ce réglage n'a pas été testé.
+
+
+4. Coût de complexité
+Maintenant. 0.1 × longueur + 0.5 × nombre de sommets + 10 × nombre d'arcs.
+Pourquoi. ajouter_arc et supprimer_arc changent la dimension du modèle, ce qui est le principe d'un RJMCMC. Il faut donc un prior qui pénalise la taille du réseau. Un nouvel arc doit alors « payer » son coût par un meilleur ajustement aux données, sinon il est rejeté. Sans ce terme, rien n'empêche le réseau de grossir ou de rétrécir. Sur la vérité terrain du cas de test, la complexité représente 174 sur un total de 491.
+Limite. Les poids 0,1 / 0,5 / 10 sont choisis à la main et sont à régler sur les vraies données.
+
+
+5. Pénalité d'intersection
+Avant. +100 par arc qui s'auto-intersecte, +10 par paire d'arcs qui se croisent (tkl.util.intersects). Ces valeurs n'avaient aucun lien avec des mètres. Un vrai réseau a des carrefours, donc la bonne solution était pénalisée.
+Maintenant.
+• les auto-intersections coûtent 20, via LineString.is_simple de shapely ;
+• les croisements entre arcs ne coûtent rien par défaut (lam_croisement = 0) ;
+• si on l'active, la pénalité compte les paires d'arcs dont crosses est vrai. Elle n'a de sens que sur un réseau nodé, c'est-à-dire avec les arcs découpés aux carrefours comme le fait reconstruire_reseau, où deux arcs ne doivent se toucher qu'aux extrémités. Sur un réseau non nodé, un simple carrefour serait pénalisé.
+
+
+6. Accélération du calcul
+• KD-tree. Les traces GPS ne changent jamais, donc leur tableau de points et leur KD-tree sont construits une seule fois (cache dans _preparer_gps). Avant, getCoord() était reconverti en boucle Python à chaque appel, pour chaque paire trace/arc, avec une matrice N×M à chaque fois.
+• Densification. Le réseau est échantillonné tous les 2 m (_densifier). La distance au point le plus proche approche ainsi la distance au segment, avec une erreur d'au plus 1 m.
+• Impression. Le print("Intersection : ", ...) d'autointersection est supprimé.
+• Résultat. Une évaluation passe de 7 ms à 0,7 ms.
+
+
+7. Unités de σ
+Les distances sont divisées par σ (3 m, le bruit GPS attendu) avant le coût de Huber. Le seuil de 2σ reste cohérent si l'échelle change, et les poids se règlent plus simplement.
+
+
+
+Dans la boucle RJMCMC
+
+1. Coût courant mis en cache
+L'ancien code appelait objectif 4 fois par itération : 2 pour rapport, 1 pour print("Cout actuel") et 1 pour print("Cout potentiel"). Dans la calibration de T0, il recalculait aussi le coût du réseau de départ à chaque tirage. Dans RJMCMC_v2.py, le coût courant est calculé une fois et mis à jour quand un saut est accepté. Chaque itération ne fait plus qu'une évaluation, celle du réseau candidat. La calibration utilise aussi 30 tirages au lieu de 100.
+
+2. Calibration de T0 corrigée
+• T0 = -delta / np.log(p0) : comme log(p0) < 0, T0 a le signe de delta.
+• L'ancien code calculait d0 = np.mean(liste_delta), une moyenne de deltas signés. Quand le réseau initial est loin de l'optimum, la plupart des sauts améliorent, donc d0 < 0, donc T0 < 0.
+• Ensuite, exp(-Δ / temp) avec temp < 0 et Δ > 0 donne exp(valeur positive) > 1, donc rapport = 1 : toute dégradation est acceptée. L'algorithme se comporte comme une marche aléatoire.
+• Dans la v2, seules les dégradations (d > 0) sont moyennées.
+
+3. Refroidissement géométrique
+• Avant. T0 / 2^(i // 5). À l'itération 100, T valait environ 10⁻⁶ × T0. À partir de l'itération 30 environ, plus aucune dégradation n'était acceptée.
+• Maintenant. T = T0 × 0,001^(i / (arret − 1)). T baisse régulièrement de T0 à T0 / 1000 sur toute la durée, donc l'exploration se répartit sur toute la chaîne, quel que soit arret.
