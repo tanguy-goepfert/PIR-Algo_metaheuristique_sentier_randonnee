@@ -28,20 +28,74 @@ def init_affichage(reseau, traces):
     (ligne_interactive,) = ax.plot([], [])
 
 
-def afficher(arc, iteration, pause=0.05):
+def afficher(arc, iteration, cout, temperature, pause=0.05):
+    # A faire : afficher tous les arcs du réseau
     xs, ys = arc.getX(), arc.getY()  # sépare les x et les y
     
     ligne_interactive.set_data(xs, ys)
-    ax.set_title(f"Itération {iteration}")   # mise à jour du titre
+    ax.set_title(f"Itération {iteration}, cout : {cout}, T : {round(temperature, 3)}")   # mise à jour du titre
     ax.relim()
     ax.autoscale_view()
     fig.canvas.draw_idle()
     plt.pause(pause)
-    # for arc in reseau:
-    #     plt.plot(arc.getX(), arc.getY(), linewidth=1, color='red')
 
 
-def temperature(i, delta=10, p0=0.5, alpha=2, palier=5):
+
+def T0_choix_delta(reseau, indices_actions, prob_perturbations, perturbations, traces):
+    """
+    Mesure la moyenne des degradations de cout sur 100 itérations du RJMCMC
+    """
+ 
+    liste_delta=[]
+    for i in range(100):
+        print("itération calcul d0", i)
+        #tirage_au_sort, d'une des perturbations avec la loi de probabilite 
+        #en entree
+        action=random.choices(indices_actions,prob_perturbations)[0]
+        #saut
+        reseau_potentiel=reseau.copy()
+        perturbations[action](reseau_potentiel,traces)
+        #evaluation : si on minimise la fonction cout, on accepte, sinon on
+        #tire au sort avec proba cout(i)/cout(i+1 potentiel)
+        ecart_cout = objectif(reseau=reseau_potentiel,gps_tracks=traces)-objectif(reseau=reseau,gps_tracks=traces)
+        print("ecart_cout= ", ecart_cout)
+        if ecart_cout > 0 :
+            liste_delta.append(ecart_cout)
+    delta=np.mean(liste_delta)
+    print("delta=",delta)
+    return delta
+
+def T0_choix_alpha(delta=10, p0=0.8, T_final=0.01, duree_palier=100, N=20000):
+    """
+        Parameters
+        ----------
+        delta : TYPE int
+            DESCRIPTION : Degradation à chaque itération du RJMCMC
+        p0 : TYPE float
+                    DESCRIPTION : probabilité d'acceptation initiale
+        T_final : TYPE float 
+            DESCRIPTION : Température à la fin des itérations
+        duree_palier : TYPE int
+            DESCRIPTION : durée d'un palier --> nombre itération avant de changer d'un palier
+            explorer.
+        N : TYPE int 
+            DESCRIPTION : Nombre d'itérations du RJMCMC
+    
+        Returns
+        -------
+        alpha : TYPE float
+            DESCRIPTION : facteur de refroidissement par palier : plus alpha est grand, plus la descente est brutale
+        """
+    # Calcul T0
+    T0 = -delta / np.log(p0)
+    print("T0= ", T0)
+    # Calcul alpha
+    nb_palier = N // duree_palier
+    alpha = (T0 / T_final) ** (1/nb_palier)
+    print("alpha= ", alpha)
+    return alpha
+
+def temperature(i, delta=10, p0=0.8, alpha=2, duree_palier=100):
     """
     Renvoie une température adaptée à une certaine itération du rjmcmc.
     ---------
@@ -54,17 +108,16 @@ def temperature(i, delta=10, p0=0.5, alpha=2, palier=5):
     plus p0 est proche de 1, plus T₀ est grand (exploration forte).
     alpha : TYPE integer
                 DESCRIPTION : facteur de refroidissement par palier : plus alpha est grand, plus la descente est brutale
-    palier : TYPE integer
+    duree_palier : TYPE integer
                 DESCRIPTION : Nombre d'itération avant de changer de palier
     """
     T0 = -delta / np.log(p0)
     try:
-        return T0 / (alpha ** (i // palier))
+        return T0 / (alpha ** (i // duree_palier))
     except :
         return 0
 
-
-def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbations=[],plot=False):
+def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbations=[],plot=False, print_infos=True):
     """
     Parameters
     ----------
@@ -108,21 +161,9 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
     if prob_perturbations==[]: #equiprobatilite
         prob_perturbations = np.ones(len(perturbations))/len(perturbations)
     
-    #calcul initialisation température
-    liste_delta=[]
-    for i in range(100):
-        print("itération calcul d0", i)
-        #tirage_au_sort, d'une des perturbations avec la loi de probabilite 
-        #en entree
-        action=random.choices(indices_actions,prob_perturbations)[0]
-        #saut
-        reseau_potentiel=reseau.copy()
-        perturbations[action](reseau_potentiel,traces)
-        #evaluation : si on minimise la fonction cout, on accepte, sinon on
-        #tire au sort avec proba cout(i)/cout(i+1 potentiel)
-        liste_delta.append(objectif(reseau=reseau_potentiel,gps_tracks=traces)-objectif(reseau=reseau,gps_tracks=traces))
-        d0=np.mean(liste_delta)
-    print("delta=",d0)
+    # Calcul initialisation température
+    d0 = T0_choix_delta(reseau, indices_actions, prob_perturbations, perturbations, traces)
+    alpha = T0_choix_alpha(delta=d0, p0=0.8, T_final=0.01, duree_palier=100, N=20000)
 
     # Affichage
     if plot == True:
@@ -143,21 +184,24 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
         #evaluation : si on minimise la fonction cout, on accepte, sinon on
         #tire au sort avec proba cout(i)/cout(i+1 potentiel)
 
-        temp = temperature(i,delta=d0, palier=1000)
+        temp = temperature(i, delta=d0, alpha=alpha, duree_palier=100)
+
+        cout_actuel = objectif(reseau=reseau, gps_tracks=traces, print_infos=False)
+        cout_potentiel = objectif(reseau=reseau_potentiel, gps_tracks=traces, print_infos=False)
         
         rapport =  min(1,np.exp(
-                            -(objectif(reseau=reseau_potentiel,gps_tracks=traces)-objectif(reseau=reseau,gps_tracks=traces))
+                            -(cout_potentiel-cout_actuel)
                             /temp 
                             ))
 
         k = random.random()
 
-        print("Cout actuel = ", objectif(reseau=reseau,gps_tracks=traces, infos=False))
-        print("Cout potentiel = ", objectif(reseau=reseau_potentiel,gps_tracks=traces, infos=False))
-
-        print("Rapport = ", rapport)
-        print("k = ", k)
-        print("Température = ", temp)
+        if print_infos==True:
+            print("Cout actuel = ", cout_actuel)
+            print("Cout potentiel = ", cout_potentiel)
+            print("Rapport = ", rapport)
+            print("k = ", k)
+            print("Température = ", temp)
 
 
         if rapport == 1 :
@@ -165,7 +209,7 @@ def RJMCMC_reseau_traces(r0,traces,perturbations,objectif,arret,prob_perturbatio
             print("OK")
             # Affichage
             if plot == True:
-                afficher(reseau[0], iteration=i)
+                afficher(reseau[0], iteration=i, cout=cout_actuel, temperature=temp)
         elif k <= rapport :
             reseau=reseau_potentiel
             print("BOF MAIS OK")

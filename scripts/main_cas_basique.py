@@ -30,27 +30,27 @@ if __name__=="__main__":
 
 
 
-    # ### Affichage
-    # plt.figure(figsize=(8, 6))
+    ### Affichage
+    plt.figure(figsize=(8, 6))
 
-    # # Affichage des traces
-    # for t in gps_tracks:
-    #     plt.plot(t.getX(), t.getY(), linewidth=1, color='black')
+    # Affichage des traces
+    for t in gps_tracks:
+        plt.plot(t.getX(), t.getY(), linewidth=1, color='black')
     
-    # # Reseau par dessus
-    # for t in reseau:
-    #     plt.plot(t.getX(), t.getY(), linewidth=3, color='blue')
+    # Reseau par dessus
+    for t in reseau:
+        plt.plot(t.getX(), t.getY(), linewidth=3, color='blue')
 
 
 
     ### RJMCMC
     actions = [deplacer_vertex_prox]
     
-    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=30000, plot=True)
-    print("Score initial : ", objectif(reseau=reseau, gps_tracks=gps_tracks, infos=True))
-    print("Score solution : ", objectif(reseau=solution, gps_tracks=gps_tracks, infos=True))
+    solution = RJMCMC_reseau_traces(r0=reseau, traces=gps_tracks, perturbations=actions, objectif=objectif, arret=10000, plot=False, print_infos=False)
+    print("Score initial : ", objectif(reseau=reseau, gps_tracks=gps_tracks, print_infos=True))
+    print("Score solution : ", objectif(reseau=solution, gps_tracks=gps_tracks, print_infos=True))
 
     # Affichage solution
     for s in solution:
         plt.plot(s.getX(), s.getY(), linewidth=2, color='red')
-    # plt.show()
+    plt.show()

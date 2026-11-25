@@ -45,7 +45,6 @@ def ajouter_arc(reseau, tracks):
         new_arc = tkl.Track([o1, o2])
     reseau.addTrack(new_arc)
 
-
 def supprimer_arc(reseau, tracks):
     """
     Supprime aléatoirement un arc du réseau. 
@@ -53,8 +52,6 @@ def supprimer_arc(reseau, tracks):
     r = rng.randint(0, len(reseau) - 1) # Indice aléatoire de l'arc à supprimer
     arc_a_sup = reseau.getTrack(r)
     reseau.removeTrack(arc_a_sup)
-
-
 
 def supprimer_vertex(reseau, tracks):
     """
@@ -226,8 +223,6 @@ def detecter_points_proches(reseau, tracks):
 
     return points_proches
 
-
-
 def snap_points(reseau, points_proches):
     """
     Regroupe les points proches en leur attribuant une position commune.
@@ -258,7 +253,6 @@ def snap_points(reseau, points_proches):
         trace2.setObs(l, point2)
 
     return reseau
-
 
 def trouver_noeuds(reseau, points_proches):
     """
@@ -318,7 +312,6 @@ def trouver_noeuds(reseau, points_proches):
 
     return noeuds
 
-
 def construire_arcs(reseau, noeuds):
     """
     Découpe les traces en arcs délimités par les nœuds.
@@ -348,7 +341,6 @@ def construire_arcs(reseau, noeuds):
                 arcs.append(arc)
 
     return tkl.core.TrackCollection(arcs)
-
 
 def supprimer_arcs_doubles(reseau):
     """
@@ -388,7 +380,6 @@ def supprimer_arcs_doubles(reseau):
             arcs_uniques.append(trace)
 
     return tkl.core.TrackCollection(arcs_uniques)
-
 
 def reconstruire_reseau(reseau, points_proches):
     """

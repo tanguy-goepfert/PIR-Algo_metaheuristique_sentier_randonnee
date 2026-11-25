@@ -35,7 +35,7 @@ def distance_hausdorff(trace, arc):
     H21 = np.min(dist_matrix, axis=0)
 
     # La somme des maximums de ces minimums
-    return np.max(H12) + np.max(H21)
+    return np.max(H12) #+ np.max(H21)
 
 def distance_moyenne(trace1, trace2):
     """
@@ -75,7 +75,7 @@ def autointersection(arc) :
 
     poly = LineString(liste)
     intersection = not poly.is_simple
-    if intersection : print("Intersection : ", intersection)
+    #if intersection : print("Intersection : ", intersection)
         
     return intersection
 
@@ -115,7 +115,7 @@ def angle_deviation_moyen(arc):
         
 
 
-def objectif(gps_tracks, reseau, infos=False) :
+def objectif(gps_tracks, reseau, print_infos=False) :
     """
     distance de hausdorf entre chaque arc et sa trace la plus "proche".
     return : moyenne des couts de chaque arc
@@ -183,10 +183,10 @@ def objectif(gps_tracks, reseau, infos=False) :
         cout_D += D_j
     #cout_D = cout_D/2
 
-    cout = cout_H  + couts_I + cout_M + cout_D
+    cout = cout_H  #+ couts_I + cout_M + cout_D
 
     # Pour débugger
-    if infos :
+    if print_infos :
         print("H: ",cout_H, "I: ", couts_I, "M: ", cout_M, "D: ", cout_D)
     
     return cout
