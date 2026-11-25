@@ -2,6 +2,8 @@ from initialisation_jeu_de_trace import *
 import math
 import random
 from scipy.spatial import cKDTree
+import tracklib as tkl
+import matplotlib.pyplot as plt
 
 # Génération aléatoire indépendante
 rng = random.Random()
@@ -410,25 +412,90 @@ def reconstruire_reseau(reseau, points_proches):
 
     return reseau
 
+def ajouter_vertex(reseau, tracks):
+    """
+    Ajoute un vertex à un indice aléatoire d'un arc du réseau.
+    """
+
+    # Sélection d'un arc au hasard
+    r = rng.randint(0, len(reseau) - 1)
+    arc_a_modif = reseau.getTrack(r)
+
+    # Sélection d'un indice aléatoire
+    indice = rng.randint(0, len(arc_a_modif) - 1)
+
+    # Récupération du vertex de référence
+    observation = arc_a_modif.getObs(indice)
+    x = observation.position.getX()
+    y = observation.position.getY()
+
+    # Nouvelles coordonnées aléatoires
+    nouveau_x = x + random.gauss() * 10
+    nouveau_y = y + random.gauss() * 10
+
+    # Création du nouveau vertex
+    position = tkl.ENUCoords(nouveau_x, nouveau_y, 0.0)
+    nouveau_vertex = tkl.Obs(position)
+
+    # Récupération des observations
+    observations = arc_a_modif.getObsList()
+
+    # Insertion du nouveau vertex
+    observations.insert(indice + 1, nouveau_vertex)
+
+    # Mise à jour de l'arc
+    arc_a_modif.setObsList(observations)
+
 if __name__ == "__main__" :
 
-    ### Generer les traces GPS
-    tkl.seed(110) #bloque l'aléatoire
-    tracks = traces_random(2, 0.1)
-    # Bruitage 
-    gps_tracks = bruitage(tracks, 10)
+    # Création d'une trace GPS
+    tracks = tkl.Track([
+        tkl.Obs(tkl.ENUCoords(0, 0, 0)),
+        tkl.Obs(tkl.ENUCoords(20, 20, 0)),
+        tkl.Obs(tkl.ENUCoords(40, 40, 0)),
+        tkl.Obs(tkl.ENUCoords(60, 60, 0)),
+        tkl.Obs(tkl.ENUCoords(80, 80, 0))
+    ])
 
-    # Affichage des traces GPS
+    # Création du réseau
+    reseau = tkl.core.TrackCollection([tracks])
+
+    # Affichage avant modification
     plt.figure(figsize=(8, 6))
-    # for t in gps_tracks:
-    #     plt.plot(t.getX(), t.getY(), linewidth=0.7, alpha=0.5)
+    plt.plot(tracks.getX(), tracks.getY(), "bo--", label="Avant")
+    print("Nombre de vertex avant :", len(tracks))
+
+    # Ajout d'un vertex
+    ajouter_vertex(reseau, None)
+
+    # Affichage après modification
+    plt.plot(tracks.getX(), tracks.getY(), "ro-", label="Après")
+    print("Nombre de vertex après :", len(tracks))
+
+    # Paramètres du graphique
+    plt.legend()
+    plt.grid()
+    plt.axis("equal")
+    plt.title("Test de la fonction ajouter_vertex")
+    plt.show()
+
+#     ### Generer les traces GPS
+#     tkl.seed(110) #bloque l'aléatoire
+#     tracks = traces_random(2, 0.1)
+#     # Bruitage 
+#     gps_tracks = bruitage(tracks, 10)
+
+#     # Affichage des traces GPS
+#     plt.figure(figsize=(8, 6))
+#     # for t in gps_tracks:
+#     #     plt.plot(t.getX(), t.getY(), linewidth=0.7, alpha=0.5)
 
 
-    ### Initialisation d'un premier réseau 
-    reseau = random_tirage_track(gps_tracks)
-    # # Affichage
-    # for r in reseau:
-    #     plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='black')
+#     ### Initialisation d'un premier réseau 
+#     reseau = random_tirage_track(gps_tracks)
+#     # # Affichage
+#     # for r in reseau:
+#     #     plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='black')
 
     # # Ajout d'un arc
     # ajouter_arc(reseau, tracks)
@@ -447,9 +514,9 @@ if __name__ == "__main__" :
     deplacer_vertex(reseau, tracks)
 
     # Affichage
-    for r in reseau:
-        plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='red')
-    plt.show()
+    # for r in reseau:
+    #     plt.plot(r.getX(), r.getY(), linewidth=2, alpha=0.5, color='red')
+    # plt.show()
 
     ###main pour le snap
      # # Création de la première trace
